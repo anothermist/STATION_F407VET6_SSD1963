@@ -65,15 +65,14 @@ void Error_Handler(void);
 #define LED_A_GPIO_Port GPIOA
 #define LED_B_Pin GPIO_PIN_7
 #define LED_B_GPIO_Port GPIOA
+#define TOUCH_IRQ_Pin GPIO_PIN_5
+#define TOUCH_IRQ_GPIO_Port GPIOC
 #define SD_D0_Pin GPIO_PIN_8
 #define SD_D0_GPIO_Port GPIOC
 #define SD_D1_Pin GPIO_PIN_9
 #define SD_D1_GPIO_Port GPIOC
 #define SD_CMD_Pin GPIO_PIN_2
 #define SD_CMD_GPIO_Port GPIOD
-#define TOUCH_IRQ_Pin GPIO_PIN_3
-#define TOUCH_IRQ_GPIO_Port GPIOD
-#define TOUCH_IRQ_EXTI_IRQn EXTI3_IRQn
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */

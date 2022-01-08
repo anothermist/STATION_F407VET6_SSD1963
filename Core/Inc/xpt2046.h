@@ -25,7 +25,7 @@
 #define OUT_MIN_Y	0
 #define OUT_MAX_Y	479
 
-#define	XPT2046_SPI 			hspi3
+#define	XPT2046_SPI 		hspi2
 #define	XPT2046_NSS_SOFT	0
 #define	XPT2046_NSS_PORT 	GPIOA
 #define	XPT2046_NSS_PIN 	GPIO_PIN_15
