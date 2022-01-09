@@ -1,6 +1,7 @@
 "./Core/Src/at24xx.o"
 "./Core/Src/bme280.o"
 "./Core/Src/ds3231.o"
+"./Core/Src/flash25q.o"
 "./Core/Src/main.o"
 "./Core/Src/ssd1963.o"
 "./Core/Src/stm32f4xx_hal_msp.o"
