@@ -29,6 +29,7 @@
 #include "bme280.h"
 #include "ds3231.h"
 #include "at24xx.h"
+#include "flash25q.h"
 #include "fonts/DejaVu_Sans/008_DejaVu_Sans.h"
 #include "fonts/DejaVu_Sans/009_DejaVu_Sans.h"
 #include "fonts/DejaVu_Sans/010_DejaVu_Sans.h"
