@@ -67,6 +67,8 @@ void Error_Handler(void);
 #define LED_B_GPIO_Port GPIOA
 #define TOUCH_IRQ_Pin GPIO_PIN_5
 #define TOUCH_IRQ_GPIO_Port GPIOC
+#define FLASH25Q_CS_Pin GPIO_PIN_0
+#define FLASH25Q_CS_GPIO_Port GPIOB
 #define SD_D0_Pin GPIO_PIN_8
 #define SD_D0_GPIO_Port GPIOC
 #define SD_D1_Pin GPIO_PIN_9
