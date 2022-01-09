@@ -100,8 +100,6 @@ SPI_HandleTypeDef hspi2;
 SPI_HandleTypeDef hspi3;
 
 UART_HandleTypeDef huart1;
-DMA_HandleTypeDef hdma_usart1_tx;
-DMA_HandleTypeDef hdma_usart1_rx;
 
 SRAM_HandleTypeDef hsram1;
 
@@ -122,7 +120,6 @@ static void MX_I2C1_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_SPI3_Init(void);
 static void MX_SPI2_Init(void);
-static void MX_DMA_Init(void);
 static void MX_DAC_Init(void);
 /* USER CODE BEGIN PFP */
 
@@ -143,7 +140,8 @@ uint8_t rx_data;
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	if (huart->Instance == USART1) {
 		rx_buffer[rx_index++] = rx_data;
-		HAL_UART_Receive_DMA(&huart1, &rx_data, 1);
+		HAL_UART_Receive_IT(&huart1, &rx_data, 1);
+//		HAL_UART_Receive_DMA(&huart1, &rx_data, 1);
 	}
 }
 /* USER CODE END 0 */
@@ -181,7 +179,6 @@ int main(void)
   MX_USART1_UART_Init();
   MX_SPI3_Init();
   MX_SPI2_Init();
-  MX_DMA_Init();
   MX_DAC_Init();
   /* USER CODE BEGIN 2 */
 	LCD_Init();
@@ -200,15 +197,19 @@ int main(void)
 
 //	HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
 
-	//	uint8_t uartTransmit[] = "UART OK\r\n";
-	//	HAL_UART_Transmit(&huart1, uartTransmit, sizeof(uartTransmit), 100);
-	uint8_t uartTransmitDMA[] = "UART DMA OK\r\n";
-	HAL_UART_Transmit_DMA(&huart1, uartTransmitDMA, sizeof(uartTransmitDMA));
+	uint8_t uartTransmit[] = "UART OK\r\n";
+	HAL_UART_Transmit(&huart1, uartTransmit, sizeof(uartTransmit), 100);
 
-	//	HAL_UART_Receive_IT(&huart1, &rx_data, UART_RX_BUFFER_SIZE);
-	HAL_UART_Receive_DMA (&huart1, rx_buffer, UART_RX_BUFFER_SIZE);
+	uint8_t uartTransmit_IT[] = "UART INTERRUPT OK\r\n";
+	HAL_UART_Transmit_IT(&huart1, uartTransmit_IT, sizeof(uartTransmit_IT));
 
-	for (uint32_t i = 0; i <= 65536; i++) TIM1->CCR1 = i;
+//	uint8_t uartTransmit_DMA[] = "UART DMA OK\r\n";
+//	HAL_UART_Transmit_DMA(&huart1, uartTransmit_DMA, sizeof(uartTransmit_DMA));
+
+	HAL_UART_Receive_IT(&huart1, &rx_data, UART_RX_BUFFER_SIZE);
+//	HAL_UART_Receive_DMA (&huart1, rx_buffer, UART_RX_BUFFER_SIZE);
+
+//	for (uint32_t i = 0; i <= 65536; i++) TIM1->CCR1 = i;
 
 /*	DS3231_setHrs(10);
 	DS3231_setMin(15);
@@ -886,25 +887,6 @@ static void MX_USART1_UART_Init(void)
   /* USER CODE BEGIN USART1_Init 2 */
 
   /* USER CODE END USART1_Init 2 */
-
-}
-
-/**
-  * Enable DMA controller clock
-  */
-static void MX_DMA_Init(void)
-{
-
-  /* DMA controller clock enable */
-  __HAL_RCC_DMA2_CLK_ENABLE();
-
-  /* DMA interrupt init */
-  /* DMA2_Stream2_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA2_Stream2_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(DMA2_Stream2_IRQn);
-  /* DMA2_Stream7_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA2_Stream7_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(DMA2_Stream7_IRQn);
 
 }
 
