@@ -4,9 +4,9 @@
 #include "stm32f4xx_hal.h"
 #include "math.h"
 
-#define DS3231_I2C					hi2c1
+#define DS3231_I2C			hi2c1
 #define DS3231_I2C_TIMEOUT	100
-#define DS3231_ADDRESS			0xD0
+#define DS3231_ADDRESS		0xD0
 
 uint8_t decToBcd(uint8_t val);
 

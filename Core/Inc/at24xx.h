@@ -4,10 +4,10 @@
 #include "stm32f4xx_hal.h"
 #include <stdbool.h>
 
-#define        AT24XX_I2C           hi2c1
-#define        AT24XX_ADDRESS       0x57 // 0x50 0x57
-#define        AT24XX_SIZE_KBIT     32
-#define        FREERTOS_IS_ENABLE   0
+#define AT24XX_I2C				hi2c1
+#define AT24XX_ADDRESS			0x57 // 0x50 0x57
+#define AT24XX_SIZE_KBIT		32
+#define AT24XX_I2C_TIMEOUT		100
 
 bool AT24XX_IsConnected(void);
 
