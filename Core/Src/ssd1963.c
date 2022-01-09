@@ -1,4 +1,4 @@
-#include "ssd1963_fsmc.h"
+#include "ssd1963.h"
 
 uint32_t RGB(uint8_t r, uint8_t g, uint8_t b)
 {   

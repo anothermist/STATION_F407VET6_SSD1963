@@ -20,7 +20,7 @@
 #define LCD_RST_SET   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET);
 #define LCD_RST_RESET HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
 
-#define MIRROR_V 0
+#define MIRROR_V 1
 #define MIRROR_H 0
 											
 #define LSHIFT 0
