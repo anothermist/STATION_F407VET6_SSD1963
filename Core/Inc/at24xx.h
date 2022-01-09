@@ -7,7 +7,7 @@
 #define AT24XX_I2C				hi2c1
 #define AT24XX_ADDRESS			0x57 // 0x50 0x57
 #define AT24XX_SIZE_KBIT		32
-#define AT24XX_I2C_TIMEOUT		100
+#define AT24XX_I2C_TIMEOUT		1000
 
 bool AT24XX_IsConnected(void);
 

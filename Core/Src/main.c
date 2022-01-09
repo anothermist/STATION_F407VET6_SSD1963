@@ -187,17 +187,19 @@ int main(void)
   /* USER CODE BEGIN 2 */
 	LCD_Init();
 	XPT2046_Init();
+	BME280_Init();
+
+//	temperature = BME280_getTemperature(-1);
+//	humidity = BME280_getHumidity(-1);
+//	pressure = (uint16_t)BME280_getPressure();
 
 	LCD_Rect_Fill(0, 0, 800, 480, BLUE);
 	LCD_Rect_Fill(1, 1, 798, 478, BLACK);
 
-	LCD_Font(20, 127, "Waiting for I2C", &DejaVu_Sans_48, 1, RED);
 	for (uint16_t i = 0; i < 155; i++) hT[i] = byteS(AT24XX_Read(i * 2 + 1000), AT24XX_Read(i * 2 + 1 + 1000));
 	for (uint16_t i = 0; i < 155; i++) hH[i] = byteS(AT24XX_Read(i * 2 + 2000), AT24XX_Read(i * 2 + 1 + 2000));
 	for (uint16_t i = 0; i < 155; i++) hP[i] = byteS(AT24XX_Read(i * 2 + 3000), AT24XX_Read(i * 2 + 1 + 3000));
-	LCD_Font(20, 127, "Waiting for I2C", &DejaVu_Sans_48, 1, BLACK);
 
-	BME280_Init();
 
 //	HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
 
@@ -215,14 +217,13 @@ int main(void)
 
 //	for (uint32_t i = 0; i <= 65536; i++) TIM1->CCR1 = i;
 
-/*	DS3231_setHrs(10);
-	DS3231_setMin(15);
-	DS3231_setSec(0);
-	DS3231_setDate(07);
-	DS3231_setMonth(1);
-	DS3231_setYear(22);
-	DS3231_setDay(5);
-*/
+//	DS3231_setHrs(10);
+//	DS3231_setMin(15);
+//	DS3231_setSec(0);
+//	DS3231_setDate(07);
+//	DS3231_setMonth(1);
+//	DS3231_setYear(22);
+//	DS3231_setDay(5);
 
 
   /* USER CODE END 2 */
@@ -378,16 +379,19 @@ int main(void)
 
 						char weatherPrintP[11];
 
-						if (pressureLast >= 1000) sprintf(weatherPrintP, "%02d", pressureLast);
-						else sprintf(weatherPrintP, "%02dP", pressureLast);
-						LCD_Font(321, 187, weatherPrintP, &DejaVu_Sans_48, 1, BLACK);
+						if (pressureLast >= 1000) sprintf(weatherPrintP, "%02dP", pressureLast);
+						LCD_Font(320, 187, weatherPrintP, &DejaVu_Sans_48, 1, BLACK);
 
-						if (pressure <= 1000) sprintf(weatherPrintP, "%02d", pressure);
-						else sprintf(weatherPrintP, "0%02dP", pressure);
-						LCD_Font(321, 187, weatherPrintP, &DejaVu_Sans_48, 1, GREEN);
-						LCD_Font(321, 187, "0", &DejaVu_Sans_48, 1, BLACK);
+						if (pressureLast < 1000) sprintf(weatherPrintP, " %02dP", pressureLast);
+						LCD_Font(320, 187, weatherPrintP, &DejaVu_Sans_48, 1, BLACK);
 
 						pressureLast = pressure;
+
+						if (pressureLast >= 1000) sprintf(weatherPrintP, "%02dP", pressureLast);
+						LCD_Font(320, 187, weatherPrintP, &DejaVu_Sans_48, 1, GREEN);
+
+						if (pressureLast < 1000) sprintf(weatherPrintP, " %02dP", pressureLast);
+						LCD_Font(320, 187, weatherPrintP, &DejaVu_Sans_48, 1, GREEN);
 					}
 
 					if (AT24XX_Read(0) != rtcHrs) {
