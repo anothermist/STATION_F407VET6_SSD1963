@@ -268,7 +268,7 @@ int main(void)
 	default:
 		sprintf(str1,"w25qxx Unknown ID\r\n");
 		HAL_UART_Transmit(&huart1,(uint8_t*)str1,strlen(str1),0x1000);
-		return;
+		break;
 	}
 
 		HAL_UART_Transmit(&huart1,(uint8_t*)str1,strlen(str1),0x1000);
