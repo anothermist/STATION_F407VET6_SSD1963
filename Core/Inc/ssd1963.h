@@ -1,9 +1,5 @@
-#ifndef _SSD1963_FSMS_H_
-#define _SSD1963_FSMS_H_
-
-#ifdef __cplusplus
- extern "C" {
-#endif
+#ifndef INC_SSD1963_FSMS_H_
+#define INC_SSD1963_FSMS_H_
 
 #include "stm32f4xx_hal.h"
 #include "stm32f4xx_hal_gpio.h"
@@ -137,8 +133,4 @@ void LCD_Font(uint16_t x, uint16_t y, const char *text, const GFXfont *p_font, u
 #define LCD_PRC				0x00F7
 #define LCD_VERTICAL_SCROLL 0x0033 
 
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* _SSD1963_FSMS_H_ */
+#endif /* INC_SSD1963_FSMS_H_ */

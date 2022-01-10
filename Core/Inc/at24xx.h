@@ -1,5 +1,5 @@
-#ifndef    _AT24XX_H
-#define    _AT24XX_H
+#ifndef    INC_AT24XX_H
+#define    INC_AT24XX_H
 
 #include "stm32f4xx_hal.h"
 #include <stdbool.h>
@@ -21,4 +21,4 @@ void AT24XX_Write(uint16_t address, uint8_t val);
 
 void AT24XX_Update(uint16_t address, uint8_t val);
 
-#endif /* AT24XX_H_ */
+#endif /* INC_AT24XX_H_ */

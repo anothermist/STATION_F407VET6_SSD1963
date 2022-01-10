@@ -1,5 +1,5 @@
-#ifndef DS3231_H_
-#define DS3231_H_
+#ifndef INC_DS3231_H_
+#define INC_DS3231_H_
 
 #include "stm32f4xx_hal.h"
 #include "math.h"
@@ -84,4 +84,4 @@ uint64_t DS3231_getUnix(uint64_t zoneCorrection);
 
 float DS3231_getMoonDay(void);
 
-#endif /* DS3231_H_ */
+#endif /* INC_DS3231_H_ */

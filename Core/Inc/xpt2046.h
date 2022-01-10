@@ -1,9 +1,5 @@
-#ifndef _XPT2046_H_
-#define _XPT2046_H_
-
-#ifdef __cplusplus
- extern "C" {
-#endif
+#ifndef INC_XPT2046_H_
+#define INC_XPT2046_H_
 
 #include "stm32f4xx_hal.h"
 #include "stm32f4xx_hal_gpio.h"
@@ -39,8 +35,4 @@ uint16_t getRaw(uint8_t address);
 uint16_t getX(void);
 uint16_t getY(void);
 
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* _XPT2046_H_ */
+#endif /* INC_XPT2046_H_ */

@@ -1,9 +1,5 @@
-#ifndef _BME280_H_
-#define _BME280_H_
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#ifndef INC_BME280_H_
+#define INC_BME280_H_
 
 #include "stm32f4xx_hal.h"
 #include "math.h"
@@ -29,8 +25,4 @@ double calculate_humidex(double temperature, double humidity);
 
 double calculate_humidityAbsolute(double temperature, double humidityRelative);
 
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* _BME280_H_ */
+#endif /* INC_BME280_H_ */

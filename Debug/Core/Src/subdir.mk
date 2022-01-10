@@ -8,7 +8,6 @@ C_SRCS += \
 ../Core/Src/at24xx.c \
 ../Core/Src/bme280.c \
 ../Core/Src/ds3231.c \
-../Core/Src/flash25q.c \
 ../Core/Src/main.c \
 ../Core/Src/ssd1963.c \
 ../Core/Src/stm32f4xx_hal_msp.c \
@@ -16,13 +15,13 @@ C_SRCS += \
 ../Core/Src/syscalls.c \
 ../Core/Src/sysmem.c \
 ../Core/Src/system_stm32f4xx.c \
+../Core/Src/w25qxx.c \
 ../Core/Src/xpt2046.c 
 
 OBJS += \
 ./Core/Src/at24xx.o \
 ./Core/Src/bme280.o \
 ./Core/Src/ds3231.o \
-./Core/Src/flash25q.o \
 ./Core/Src/main.o \
 ./Core/Src/ssd1963.o \
 ./Core/Src/stm32f4xx_hal_msp.o \
@@ -30,13 +29,13 @@ OBJS += \
 ./Core/Src/syscalls.o \
 ./Core/Src/sysmem.o \
 ./Core/Src/system_stm32f4xx.o \
+./Core/Src/w25qxx.o \
 ./Core/Src/xpt2046.o 
 
 C_DEPS += \
 ./Core/Src/at24xx.d \
 ./Core/Src/bme280.d \
 ./Core/Src/ds3231.d \
-./Core/Src/flash25q.d \
 ./Core/Src/main.d \
 ./Core/Src/ssd1963.d \
 ./Core/Src/stm32f4xx_hal_msp.d \
@@ -44,6 +43,7 @@ C_DEPS += \
 ./Core/Src/syscalls.d \
 ./Core/Src/sysmem.d \
 ./Core/Src/system_stm32f4xx.d \
+./Core/Src/w25qxx.d \
 ./Core/Src/xpt2046.d 
 
 
@@ -54,7 +54,7 @@ Core/Src/%.o: ../Core/Src/%.c Core/Src/subdir.mk
 clean: clean-Core-2f-Src
 
 clean-Core-2f-Src:
-	-$(RM) ./Core/Src/at24xx.d ./Core/Src/at24xx.o ./Core/Src/bme280.d ./Core/Src/bme280.o ./Core/Src/ds3231.d ./Core/Src/ds3231.o ./Core/Src/flash25q.d ./Core/Src/flash25q.o ./Core/Src/main.d ./Core/Src/main.o ./Core/Src/ssd1963.d ./Core/Src/ssd1963.o ./Core/Src/stm32f4xx_hal_msp.d ./Core/Src/stm32f4xx_hal_msp.o ./Core/Src/stm32f4xx_it.d ./Core/Src/stm32f4xx_it.o ./Core/Src/syscalls.d ./Core/Src/syscalls.o ./Core/Src/sysmem.d ./Core/Src/sysmem.o ./Core/Src/system_stm32f4xx.d ./Core/Src/system_stm32f4xx.o ./Core/Src/xpt2046.d ./Core/Src/xpt2046.o
+	-$(RM) ./Core/Src/at24xx.d ./Core/Src/at24xx.o ./Core/Src/bme280.d ./Core/Src/bme280.o ./Core/Src/ds3231.d ./Core/Src/ds3231.o ./Core/Src/main.d ./Core/Src/main.o ./Core/Src/ssd1963.d ./Core/Src/ssd1963.o ./Core/Src/stm32f4xx_hal_msp.d ./Core/Src/stm32f4xx_hal_msp.o ./Core/Src/stm32f4xx_it.d ./Core/Src/stm32f4xx_it.o ./Core/Src/syscalls.d ./Core/Src/syscalls.o ./Core/Src/sysmem.d ./Core/Src/sysmem.o ./Core/Src/system_stm32f4xx.d ./Core/Src/system_stm32f4xx.o ./Core/Src/w25qxx.d ./Core/Src/w25qxx.o ./Core/Src/xpt2046.d ./Core/Src/xpt2046.o
 
 .PHONY: clean-Core-2f-Src
 
