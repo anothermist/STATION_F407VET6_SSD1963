@@ -199,10 +199,7 @@ int main(void)
 
 
 	unsigned int id = W25QXX_Read_ID();
-	HAL_UART_Transmit(&huart1,(uint8_t*)"\r\n",2,0x1000);
-
 	char str1[30];
-
 	sprintf(str1,"ID:0x%X\r\n",id);
 	HAL_UART_Transmit(&huart1,(uint8_t*)str1,strlen(str1),0x1000);
 
@@ -222,7 +219,7 @@ int main(void)
 
 	w25_info_t  w25_info;
 
-	id &= 0x0000ffff;
+	id &= 0x0000FFFF;
 	switch(id)
 	{
 	case 0x401A:
