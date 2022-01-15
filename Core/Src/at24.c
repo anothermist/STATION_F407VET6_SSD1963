@@ -1,4 +1,4 @@
-#include "at24xx.h"
+#include "at24.h"
 
 extern I2C_HandleTypeDef AT24XX_I2C;
 
