@@ -32,6 +32,10 @@ typedef struct
 #define	W25Q_NSS_PORT 		GPIOB
 #define	W25Q_NSS_PIN 		GPIO_PIN_0
 
+extern UART_HandleTypeDef 	huart1;
+#define DEBUG_UART 			&huart1
+#define INIT_DEBUG               1
+
 #define    W25Q_WRITE_DISABLE	0x04
 #define    W25Q_WRITE_ENABLE	0x06
 #define    W25Q_SECTOR_ERASE	0x20

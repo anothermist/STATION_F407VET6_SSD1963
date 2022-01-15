@@ -2,9 +2,12 @@
 
 extern SPI_HandleTypeDef W25Q_SPI;
 
+#if (INIT_DEBUG == 1)
+extern UART_HandleTypeDef huart1;
+#endif
+
 w25_info_t  w25_info;
-char str1[30];
-uint8_t buf[10];
+uint8_t buf[64] = {0};
 
 void W25Q_Reset (void) {
 	HAL_GPIO_WritePin(W25Q_NSS_PORT, W25Q_NSS_PIN, GPIO_PIN_RESET);
@@ -12,80 +15,6 @@ void W25Q_Reset (void) {
 	buf[1] = W25Q_RESET;
 	HAL_SPI_Transmit (&W25Q_SPI, buf, 2, 1000);
 	HAL_GPIO_WritePin(W25Q_NSS_PORT, W25Q_NSS_PIN, GPIO_PIN_SET);
-}
-
-void W25Q_Read_Info(char* str_info) {
-	unsigned int id = W25Q_Read_ID();
-	sprintf(str_info,"ID:0x%X\n",id);
-	id &= 0x0000FFFF;
-	w25_info.high_cap = 0;
-	switch(id) {
-	case 0x401A:
-		w25_info.high_cap=1;
-		w25_info.BlockCount=1024;
-		strcat(str_info,"W25Q Chip: w25q512\n");
-		break;
-	case 0x4019:
-		w25_info.high_cap=1;
-		w25_info.BlockCount=512;
-		strcat(str_info,"W25Q Chip: w25q256\n");
-		break;
-	case 0x4018:
-		w25_info.BlockCount=256;
-		strcat(str_info,"W25Q Chip: w25q128\n");
-		break;
-	case 0x4017:
-		w25_info.BlockCount=128;
-		strcat(str_info,"W25Q Chip: w25q64\n");
-		break;
-	case 0x4016:
-		w25_info.BlockCount=64;
-		strcat(str_info,"W25Q Chip: w25q32\n");
-		break;
-	case 0x4015:
-		w25_info.BlockCount=32;
-		strcat(str_info,"W25Q Chip: w25q16\n");
-		break;
-	case 0x4014:
-		w25_info.BlockCount=16;
-		strcat(str_info,"W25Q Chip: w25q80\n");
-		break;
-	case 0x4013:
-		w25_info.BlockCount=8;
-		strcat(str_info,"W25Q Chip: w25q40\n");
-		break;
-	case 0x4012:
-		w25_info.BlockCount=4;
-		strcat(str_info,"W25Q Chip: w25q20\n");
-		break;
-	case 0x4011:
-		w25_info.BlockCount=2;
-		strcat(str_info,"W25Q Chip: w25q10\n");
-		break;
-	default:
-		strcat(str_info,"W25Q Unknown ID\n");
-		return;
-	}
-	w25_info.PageSize=256;
-	w25_info.SectorSize=0x1000;
-	w25_info.SectorCount=w25_info.BlockCount*16;
-	w25_info.PageCount=(w25_info.SectorCount*w25_info.SectorSize)/w25_info.PageSize;
-	w25_info.BlockSize=w25_info.SectorSize*16;
-	w25_info.NumKB=(w25_info.SectorCount*w25_info.SectorSize)/1024;
-	sprintf(str1,"Page Size: %d Bytes\n",(unsigned int)w25_info.PageSize);
-	strcat(str_info,str1);
-	sprintf(str1,"Page Count: %u\n",(unsigned int)w25_info.PageCount);
-	strcat(str_info,str1);
-	sprintf(str1,"Sector Size: %u Bytes\n",(unsigned int)w25_info.SectorSize);
-	strcat(str_info,str1);
-	sprintf(str1,"Sector Count: %u\r\n",(unsigned int)w25_info.SectorCount);
-	strcat(str_info,str1);
-	sprintf(str1,"Block Size: %u Bytes\n",(unsigned int)w25_info.BlockSize);
-	strcat(str_info,str1);
-	sprintf(str1,"Block Count: %u\n",(unsigned int)w25_info.BlockCount);
-	strcat(str_info,str1);
-	sprintf(str1,"Capacity: %u KB\n",(unsigned int)w25_info.NumKB);
-	strcat(str_info,str1);
 }
 
 void W25Q_Write_Enable(void) {
@@ -311,11 +240,11 @@ uint32_t W25Q_Read_ID(void) {
 }
 
 void W25Q_Init(void) {
-	unsigned int id = W25Q_Read_ID();
+	uint32_t id = W25Q_Read_ID();
 	HAL_Delay(100);
 	W25Q_Reset();
 	HAL_Delay(100);
-	id &= 0x0000ffff;
+	id &= 0x0000FFFF;
 	w25_info.high_cap = 0;
 	switch(id)
 	{
@@ -360,4 +289,82 @@ void W25Q_Init(void) {
 	w25_info.PageCount=(w25_info.SectorCount*w25_info.SectorSize)/w25_info.PageSize;
 	w25_info.BlockSize=w25_info.SectorSize*16;
 	w25_info.NumKB=(w25_info.SectorCount*w25_info.SectorSize)/1024;
+
+#if (INIT_DEBUG == 1)
+	char str1[30];
+	sprintf(str1,"ID:0x%X\r\n",id);
+	HAL_UART_Transmit(&huart1,(uint8_t*)str1,strlen(str1),0x1000);
+
+	w25_info.high_cap = 0;
+
+	switch(id)
+	{
+	case 0x401A:
+		w25_info.BlockCount=1024;
+		sprintf(str1,"w25qxx Chip: w25q512\r\n");
+		break;
+	case 0x4019:
+		w25_info.BlockCount=512;
+		sprintf(str1,"w25qxx Chip: w25q256\r\n");
+		break;
+	case 0x4018:
+		w25_info.BlockCount=256;
+		sprintf(str1,"w25qxx Chip: w25q128\r\n");
+		break;
+	case 0x4017:
+		w25_info.BlockCount=128;
+		sprintf(str1,"w25qxx Chip: w25q64\r\n");
+		break;
+	case 0x4016:
+		w25_info.BlockCount=64;
+		sprintf(str1,"w25qxx Chip: w25q32\r\n");
+		break;
+	case 0x4015:
+		w25_info.BlockCount=32;
+		sprintf(str1,"w25qxx Chip: w25q16\r\n");
+		break;
+	case 0x4014:
+		w25_info.BlockCount=16;
+		sprintf(str1,"w25qxx Chip: w25q80\r\n");
+		break;
+	case 0x4013:
+		w25_info.BlockCount=8;
+		sprintf(str1,"w25qxx Chip: w25q40\r\n");
+		break;
+	case 0x4012:
+		w25_info.BlockCount=4;
+		sprintf(str1,"w25qxx Chip: w25q20\r\n");
+		break;
+	case 0x4011:
+		w25_info.BlockCount=2;
+		sprintf(str1,"w25qxx Chip: w25q10\r\n");
+		break;
+	default:
+		sprintf(str1,"w25qxx Unknown ID\r\n");
+		HAL_UART_Transmit(&huart1,(uint8_t*)str1,strlen(str1),0x1000);
+		break;
+	}
+
+	HAL_UART_Transmit(&huart1,(uint8_t*)str1,strlen(str1),0x1000);
+	w25_info.PageSize=256;
+	w25_info.SectorSize=0x1000;
+	w25_info.SectorCount=w25_info.BlockCount*16;
+	w25_info.PageCount=(w25_info.SectorCount*w25_info.SectorSize)/w25_info.PageSize;
+	w25_info.BlockSize=w25_info.SectorSize*16;
+	w25_info.NumKB=(w25_info.SectorCount*w25_info.SectorSize)/1024;
+	sprintf(str1,"Page Size: %d Bytes\r\n",(uint32_t)w25_info.PageSize);
+	HAL_UART_Transmit(&huart1,(uint8_t*)str1,strlen(str1),0x1000);
+	sprintf(str1,"Page Count: %u\r\n",(uint32_t)w25_info.PageCount);
+	HAL_UART_Transmit(&huart1,(uint8_t*)str1,strlen(str1),0x1000);
+	sprintf(str1,"Sector Size: %u Bytes\r\n",(uint32_t)w25_info.SectorSize);
+	HAL_UART_Transmit(&huart1,(uint8_t*)str1,strlen(str1),0x1000);
+	sprintf(str1,"Sector Count: %u\r\n",(uint32_t)w25_info.SectorCount);
+	HAL_UART_Transmit(&huart1,(uint8_t*)str1,strlen(str1),0x1000);
+	sprintf(str1,"Block Size: %u Bytes\r\n",(uint32_t)w25_info.BlockSize);
+	HAL_UART_Transmit(&huart1,(uint8_t*)str1,strlen(str1),0x1000);
+	sprintf(str1,"Block Count: %u\r\n",(uint32_t)w25_info.BlockCount);
+	HAL_UART_Transmit(&huart1,(uint8_t*)str1,strlen(str1),0x1000);
+	sprintf(str1,"Capacity: %u KB\r\n",(uint32_t)w25_info.NumKB);
+	HAL_UART_Transmit(&huart1,(uint8_t*)str1,strlen(str1),0x1000);
+#endif
 }
