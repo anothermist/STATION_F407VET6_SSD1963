@@ -197,13 +197,13 @@ int main(void)
 	LCD_Rect_Fill(0, 0, 800, 480, BLUE);
 	LCD_Rect_Fill(1, 1, 798, 478, BLACK);
 
-/*	W25Q_Erase_Sector(2);
+//	W25Q_Erase_Sector(2);
 
-	uint8_t flashIN[] = "FLASH OK \r\n";
-	W25Q_Write_Data(8192, flashIN, 10);
-*/
-	uint8_t flashOUT[9] = {0};
-	W25Q_Read_Data(8192, flashOUT, 9);
+	uint8_t flashIN[] = "SAVE OK \r\n";
+	W25Q_Save_Page(15, flashIN, 10);
+
+	uint8_t flashOUT[10] = {0};
+	W25Q_Load_Page(15, flashOUT, 10);
 	HAL_UART_Transmit(&huart1, flashOUT, sizeof(flashOUT), 100);
 
 	for (uint16_t i = 0; i < 155; i++) hT[i] = byteS(AT24XX_Read(i * 2 + 1000), AT24XX_Read(i * 2 + 1 + 1000));

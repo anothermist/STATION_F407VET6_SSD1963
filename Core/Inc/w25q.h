@@ -67,4 +67,7 @@ void W25Q_Write_Page(uint8_t* data, uint32_t page_addr, uint32_t offset, uint32_
 void W25Q_Read_Data(uint32_t addr, uint8_t* data, uint32_t sz);
 void W25Q_Read_Page(uint8_t* data, uint32_t page_addr, uint32_t offset, uint32_t sz);
 
+void W25Q_Save_Page(uint32_t pagenum, uint8_t* data, uint32_t sz);
+void W25Q_Load_Page(uint32_t pagenum, uint8_t* data, uint32_t sz);
+
 #endif /* INC_W25Q_H_ */

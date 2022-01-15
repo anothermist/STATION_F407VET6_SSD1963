@@ -240,7 +240,7 @@ uint32_t W25Q_Read_ID(void) {
 }
 
 void W25Q_Init(void) {
-	uint32_t id = W25Q_Read_ID();
+	unsigned int id = W25Q_Read_ID();
 	HAL_Delay(100);
 	W25Q_Reset();
 	HAL_Delay(100);
@@ -293,7 +293,7 @@ void W25Q_Init(void) {
 #if (INIT_DEBUG == 1)
 	char str1[30];
 	sprintf(str1,"ID:0x%X\r\n",id);
-	HAL_UART_Transmit(&huart1,(uint8_t*)str1,strlen(str1),0x1000);
+	HAL_UART_Transmit(&huart1,(uint8_t*)str1, strlen(str1), 0x1000);
 
 	w25_info.high_cap = 0;
 
@@ -352,19 +352,28 @@ void W25Q_Init(void) {
 	w25_info.PageCount=(w25_info.SectorCount*w25_info.SectorSize)/w25_info.PageSize;
 	w25_info.BlockSize=w25_info.SectorSize*16;
 	w25_info.NumKB=(w25_info.SectorCount*w25_info.SectorSize)/1024;
-	sprintf(str1,"Page Size: %d Bytes\r\n",(uint32_t)w25_info.PageSize);
+	sprintf(str1,"Page Size: %d Bytes\r\n",(unsigned int)w25_info.PageSize);
 	HAL_UART_Transmit(&huart1,(uint8_t*)str1,strlen(str1),0x1000);
-	sprintf(str1,"Page Count: %u\r\n",(uint32_t)w25_info.PageCount);
+	sprintf(str1,"Page Count: %u\r\n",(unsigned int)w25_info.PageCount);
 	HAL_UART_Transmit(&huart1,(uint8_t*)str1,strlen(str1),0x1000);
-	sprintf(str1,"Sector Size: %u Bytes\r\n",(uint32_t)w25_info.SectorSize);
+	sprintf(str1,"Sector Size: %u Bytes\r\n",(unsigned int)w25_info.SectorSize);
 	HAL_UART_Transmit(&huart1,(uint8_t*)str1,strlen(str1),0x1000);
-	sprintf(str1,"Sector Count: %u\r\n",(uint32_t)w25_info.SectorCount);
+	sprintf(str1,"Sector Count: %u\r\n",(unsigned int)w25_info.SectorCount);
 	HAL_UART_Transmit(&huart1,(uint8_t*)str1,strlen(str1),0x1000);
-	sprintf(str1,"Block Size: %u Bytes\r\n",(uint32_t)w25_info.BlockSize);
+	sprintf(str1,"Block Size: %u Bytes\r\n",(unsigned int)w25_info.BlockSize);
 	HAL_UART_Transmit(&huart1,(uint8_t*)str1,strlen(str1),0x1000);
-	sprintf(str1,"Block Count: %u\r\n",(uint32_t)w25_info.BlockCount);
+	sprintf(str1,"Block Count: %u\r\n",(unsigned int)w25_info.BlockCount);
 	HAL_UART_Transmit(&huart1,(uint8_t*)str1,strlen(str1),0x1000);
-	sprintf(str1,"Capacity: %u KB\r\n",(uint32_t)w25_info.NumKB);
+	sprintf(str1,"Capacity: %u KB\r\n",(unsigned int)w25_info.NumKB);
 	HAL_UART_Transmit(&huart1,(uint8_t*)str1,strlen(str1),0x1000);
 #endif
+}
+
+void W25Q_Save_Page(uint32_t pagenum, uint8_t* data, uint32_t sz) {
+	W25Q_Erase_Sector(pagenum);
+	W25Q_Write_Data(pagenum * 4096, data, sz);
+}
+
+void W25Q_Load_Page(uint32_t pagenum, uint8_t* data, uint32_t sz) {
+	W25Q_Read_Data(pagenum * 4096, data, sz);
 }
