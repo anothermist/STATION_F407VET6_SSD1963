@@ -50,21 +50,17 @@ typedef struct
 #define    W25Q_WRITE_STATUS_2	0x31
 #define    W25Q_WRITE_STATUS_3	0x11
 
+void W25Q_Init(void);
+uint32_t W25Q_Read_ID(void);
 
-void W25Q_Reset(void);
-void W25Q_Read_Info(char* str_info);
-void W25Q_Write_Enable(void);
-void W25Q_Write_Disable(void);
-void W25Q_Set_Block_Protect(uint8_t val);
-void W25Q_Wait_Write_End(void);
+void W25Q_Erase_Chip(void);
 void W25Q_Erase_Sector(uint32_t addr);
 void W25Q_Erase_Block(uint32_t addr);
-void W25Q_Erase_Chip(void);
+
 void W25Q_Write_Data(uint32_t addr, uint8_t* data, uint32_t sz);
 void W25Q_Write_Page(uint8_t* data, uint32_t page_addr, uint32_t offset, uint32_t sz);
+
 void W25Q_Read_Data(uint32_t addr, uint8_t* data, uint32_t sz);
 void W25Q_Read_Page(uint8_t* data, uint32_t page_addr, uint32_t offset, uint32_t sz);
-uint32_t W25Q_Read_ID(void);
-void W25Q_Init(void);
 
 #endif /* INC_W25Q_H_ */

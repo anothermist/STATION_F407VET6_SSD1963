@@ -88,21 +88,21 @@ void W25Q_Read_Info(char* str_info) {
 	strcat(str_info,str1);
 }
 
-void W25_Write_Enable(void) {
+void W25Q_Write_Enable(void) {
 	HAL_GPIO_WritePin(W25Q_NSS_PORT, W25Q_NSS_PIN, GPIO_PIN_RESET);
 	buf[0] = W25Q_WRITE_ENABLE;
 	HAL_SPI_Transmit (&W25Q_SPI, buf, 1, 1000);
 	HAL_GPIO_WritePin(W25Q_NSS_PORT, W25Q_NSS_PIN, GPIO_PIN_SET);
 }
 
-void W25_Write_Disable(void) {
+void W25Q_Write_Disable(void) {
 	HAL_GPIO_WritePin(W25Q_NSS_PORT, W25Q_NSS_PIN, GPIO_PIN_RESET);
 	buf[0] = W25Q_WRITE_DISABLE;
 	HAL_SPI_Transmit (&W25Q_SPI, buf, 1, 1000);
 	HAL_GPIO_WritePin(W25Q_NSS_PORT, W25Q_NSS_PIN, GPIO_PIN_SET);
 }
 
-void W25_Set_Block_Protect(uint8_t val) {
+void W25Q_Set_Block_Protect(uint8_t val) {
 	buf[0] = 0x50;
 	HAL_GPIO_WritePin(W25Q_NSS_PORT, W25Q_NSS_PIN, GPIO_PIN_RESET);
 	HAL_SPI_Transmit (&W25Q_SPI, buf, 1, 1000);
@@ -114,7 +114,7 @@ void W25_Set_Block_Protect(uint8_t val) {
 	HAL_GPIO_WritePin(W25Q_NSS_PORT, W25Q_NSS_PIN, GPIO_PIN_SET);
 }
 
-void W25_Wait_Write_End(void) {
+void W25Q_Wait_Write_End(void) {
 	HAL_Delay(1);
 	HAL_GPIO_WritePin(W25Q_NSS_PORT, W25Q_NSS_PIN, GPIO_PIN_RESET);
 	buf[0] = W25Q_READ_STATUS_1;
@@ -128,11 +128,11 @@ void W25_Wait_Write_End(void) {
 	HAL_GPIO_WritePin(W25Q_NSS_PORT, W25Q_NSS_PIN, GPIO_PIN_SET);
 }
 
-void W25_Erase_Sector(uint32_t addr) {
-	W25_Wait_Write_End();
-	W25_Set_Block_Protect(0x00);
+void W25Q_Erase_Sector(uint32_t addr) {
+	W25Q_Wait_Write_End();
+	W25Q_Set_Block_Protect(0x00);
 	addr = addr * w25_info.SectorSize;
-	W25_Write_Enable();
+	W25Q_Write_Enable();
 	HAL_GPIO_WritePin(W25Q_NSS_PORT, W25Q_NSS_PIN, GPIO_PIN_RESET);
 	buf[0] = W25Q_SECTOR_ERASE;
 	if(w25_info.high_cap)
@@ -151,16 +151,16 @@ void W25_Erase_Sector(uint32_t addr) {
 		HAL_SPI_Transmit (&W25Q_SPI, buf, 4, 1000);
 	}
 	HAL_GPIO_WritePin(W25Q_NSS_PORT, W25Q_NSS_PIN, GPIO_PIN_SET);
-	W25_Wait_Write_End();
-	W25_Write_Disable();
-	W25_Set_Block_Protect(0x0F);
+	W25Q_Wait_Write_End();
+	W25Q_Write_Disable();
+	W25Q_Set_Block_Protect(0x0F);
 }
 
-void W25_Erase_Block(uint32_t addr) {
-	W25_Wait_Write_End();
-	W25_Set_Block_Protect(0x00);
+void W25Q_Erase_Block(uint32_t addr) {
+	W25Q_Wait_Write_End();
+	W25Q_Set_Block_Protect(0x00);
 	addr = addr * w25_info.BlockSize;
-	W25_Write_Enable();
+	W25Q_Write_Enable();
 	HAL_GPIO_WritePin(W25Q_NSS_PORT, W25Q_NSS_PIN, GPIO_PIN_RESET);
 	buf[0] = W25Q_BLOCK_ERASE;
 	if(w25_info.high_cap)
@@ -179,28 +179,28 @@ void W25_Erase_Block(uint32_t addr) {
 		HAL_SPI_Transmit (&W25Q_SPI, buf, 4, 1000);
 	}
 	HAL_GPIO_WritePin(W25Q_NSS_PORT, W25Q_NSS_PIN, GPIO_PIN_SET);
-	W25_Wait_Write_End();
-	W25_Write_Disable();
-	W25_Set_Block_Protect(0x0F);
+	W25Q_Wait_Write_End();
+	W25Q_Write_Disable();
+	W25Q_Set_Block_Protect(0x0F);
 }
 
-void W25_Erase_Chip(void) {
-	W25_Wait_Write_End();
-	W25_Set_Block_Protect(0x00);
-	W25_Write_Enable();
+void W25Q_Erase_Chip(void) {
+	W25Q_Wait_Write_End();
+	W25Q_Set_Block_Protect(0x00);
+	W25Q_Write_Enable();
 	HAL_GPIO_WritePin(W25Q_NSS_PORT, W25Q_NSS_PIN, GPIO_PIN_RESET);
 	buf[0] = W25Q_CHIP_ERASE;
 	HAL_SPI_Transmit (&W25Q_SPI, buf, 1, 1000);
 	HAL_GPIO_WritePin(W25Q_NSS_PORT, W25Q_NSS_PIN, GPIO_PIN_SET);
-	W25_Wait_Write_End();
-	W25_Write_Disable();
-	W25_Set_Block_Protect(0x0F);
+	W25Q_Wait_Write_End();
+	W25Q_Write_Disable();
+	W25Q_Set_Block_Protect(0x0F);
 }
 
-void W25_Write_Data(uint32_t addr, uint8_t* data, uint32_t sz) {
-	W25_Wait_Write_End();
-	W25_Set_Block_Protect(0x00);
-	W25_Write_Enable();
+void W25Q_Write_Data(uint32_t addr, uint8_t* data, uint32_t sz) {
+	W25Q_Wait_Write_End();
+	W25Q_Set_Block_Protect(0x00);
+	W25Q_Write_Enable();
 	HAL_GPIO_WritePin(W25Q_NSS_PORT, W25Q_NSS_PIN, GPIO_PIN_RESET);
 	buf[0] = W25Q_PAGE_PROGRAMM;
 	if(w25_info.high_cap)
@@ -220,21 +220,21 @@ void W25_Write_Data(uint32_t addr, uint8_t* data, uint32_t sz) {
 	}
 	HAL_SPI_Transmit (&W25Q_SPI, data, sz, 1000);
 	HAL_GPIO_WritePin(W25Q_NSS_PORT, W25Q_NSS_PIN, GPIO_PIN_SET);
-	W25_Wait_Write_End();
-	W25_Write_Disable();
-	W25_Set_Block_Protect(0x0F);
+	W25Q_Wait_Write_End();
+	W25Q_Write_Disable();
+	W25Q_Set_Block_Protect(0x0F);
 }
 
-void W25_Write_Page(uint8_t* data, uint32_t page_addr, uint32_t offset, uint32_t sz) {
+void W25Q_Write_Page(uint8_t* data, uint32_t page_addr, uint32_t offset, uint32_t sz) {
 	if(sz > w25_info.PageSize)
 		sz=w25_info.PageSize;
 	if((offset+sz) > w25_info.PageSize)
 		sz = w25_info.PageSize - offset;
 	page_addr = page_addr * w25_info.PageSize + offset;
 
-	W25_Wait_Write_End();
-	W25_Set_Block_Protect(0x00);
-	W25_Write_Enable();
+	W25Q_Wait_Write_End();
+	W25Q_Set_Block_Protect(0x00);
+	W25Q_Write_Enable();
 	HAL_GPIO_WritePin(W25Q_NSS_PORT, W25Q_NSS_PIN, GPIO_PIN_RESET);
 	buf[0] = W25Q_PAGE_PROGRAMM;
 	if(w25_info.high_cap)
@@ -254,9 +254,9 @@ void W25_Write_Page(uint8_t* data, uint32_t page_addr, uint32_t offset, uint32_t
 	}
 	HAL_SPI_Transmit (&W25Q_SPI, data, sz, 1000);
 	HAL_GPIO_WritePin(W25Q_NSS_PORT, W25Q_NSS_PIN, GPIO_PIN_SET);
-	W25_Wait_Write_End();
-	W25_Write_Disable();
-	W25_Set_Block_Protect(0x0F);
+	W25Q_Wait_Write_End();
+	W25Q_Write_Disable();
+	W25Q_Set_Block_Protect(0x0F);
 }
 
 void W25Q_Read_Data(uint32_t addr, uint8_t* data, uint32_t sz) {
@@ -270,7 +270,7 @@ void W25Q_Read_Data(uint32_t addr, uint8_t* data, uint32_t sz) {
 	HAL_GPIO_WritePin(W25Q_NSS_PORT, W25Q_NSS_PIN, GPIO_PIN_SET);
 }
 
-void W25_Read_Page(uint8_t* data, uint32_t page_addr, uint32_t offset, uint32_t sz) {
+void W25Q_Read_Page(uint8_t* data, uint32_t page_addr, uint32_t offset, uint32_t sz) {
 	if(sz > w25_info.PageSize)
 		sz=w25_info.PageSize;
 	if((offset+sz) > w25_info.PageSize)
@@ -361,5 +361,3 @@ void W25Q_Init(void) {
 	w25_info.BlockSize=w25_info.SectorSize*16;
 	w25_info.NumKB=(w25_info.SectorCount*w25_info.SectorSize)/1024;
 }
-
-

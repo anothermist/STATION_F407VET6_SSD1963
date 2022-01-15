@@ -197,11 +197,21 @@ int main(void)
 	LCD_Rect_Fill(0, 0, 800, 480, BLUE);
 	LCD_Rect_Fill(1, 1, 798, 478, BLACK);
 
+//	unsigned int id = W25Q_Read_ID();
+//	char str1[30];
+//	sprintf(str1,"ID:0x%X\r\n",id);
+//	HAL_UART_Transmit(&huart1,(uint8_t*)str1,strlen(str1),0x1000);
 
-	unsigned int id = W25Q_Read_ID();
-	char str1[30];
-	sprintf(str1,"ID:0x%X\r\n",id);
-	HAL_UART_Transmit(&huart1,(uint8_t*)str1,strlen(str1),0x1000);
+
+/*	W25Q_Erase_Sector(2);
+
+	uint8_t flashIN[] = "FLASH OK \r\n";
+	W25Q_Write_Data(8192, flashIN, 10);
+*/
+	uint8_t flashOUT[8] = {0};
+	W25Q_Read_Data(8192, flashOUT, 9);
+	HAL_UART_Transmit(&huart1, flashOUT, sizeof(flashOUT), 100);
+
 
 	for (uint16_t i = 0; i < 155; i++) hT[i] = byteS(AT24XX_Read(i * 2 + 1000), AT24XX_Read(i * 2 + 1 + 1000));
 	for (uint16_t i = 0; i < 155; i++) hH[i] = byteS(AT24XX_Read(i * 2 + 2000), AT24XX_Read(i * 2 + 1 + 2000));
