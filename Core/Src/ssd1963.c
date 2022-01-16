@@ -1,12 +1,10 @@
 #include "ssd1963.h"
 
-uint32_t RGB(uint8_t r, uint8_t g, uint8_t b)
-{   
+uint32_t RGB(uint8_t r, uint8_t g, uint8_t b) {
     return ((r & 0xFF) << 16) + ((g & 0xFF) << 8) + (b & 0xFF);
 }
 
-uint16_t H24_RGB565(uint8_t reverse, uint32_t color24)
-{
+uint16_t H24_RGB565(uint8_t reverse, uint32_t color24) {
 	uint8_t b = (color24 >> 16) & 0xFF;
 	uint8_t g = (color24 >> 8) & 0xFF;
 	uint8_t r = color24 & 0xFF;
@@ -14,19 +12,16 @@ uint16_t H24_RGB565(uint8_t reverse, uint32_t color24)
 	else return ((r / 8) << 11) | ((g / 4) << 5) | (b / 8);
 }
 
-void LCD_Send_Cmd(uint16_t cmd)
-{
+void LCD_Send_Cmd(uint16_t cmd) {
 	CMD = cmd;
 }
 
-void LCD_Send_Dat(uint16_t dat)
-{
+void LCD_Send_Dat(uint16_t dat) {
 	for (uint8_t i = 0; i < 1; i++)
 	DAT = dat;
 }
 
-void LCD_Window(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2)
-{
+void LCD_Window(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2) {
 	LCD_Send_Cmd(LCD_COLUMN_ADDR);
 	LCD_Send_Dat(y1 >> 8);
 	LCD_Send_Dat(y1 & 0x00FF);
@@ -40,22 +35,19 @@ void LCD_Window(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2)
 	LCD_Send_Cmd(LCD_GRAM);
 }
 
-void LCD_Pixel(uint16_t x, uint16_t y, uint32_t color24)
-{
+void LCD_Pixel(uint16_t x, uint16_t y, uint32_t color24) {
 	LCD_Window(x, y, x, y);
 	LCD_Send_Dat(H24_RGB565(1, color24));
 }
 
-void LCD_Rect_Fill(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint32_t color24)
-{
+void LCD_Rect_Fill(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint32_t color24) {
 	uint32_t i = 0;
 	uint32_t j = (uint32_t) w * (uint32_t) h;
 	LCD_Window(y, x, y + h - 1, x + w - 1);
 	for (i = 0; i < j; i++) LCD_Send_Dat(H24_RGB565(1, color24));
 }
 
-void LCD_Line(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t size, uint32_t color24)
-{
+void LCD_Line(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t size, uint32_t color24) {
 	int deltaX = abs(x2 - x1);
 	int deltaY = abs(y2 - y1);
 	int signX = x1 < x2 ? 1 : -1;
@@ -81,8 +73,7 @@ void LCD_Line(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t size, 
 	}
 }
 
-void LCD_Triangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t size, uint32_t color24)
-{
+void LCD_Triangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t size, uint32_t color24) {
 	LCD_Line(x1, y1, x2, y2, size, color24);
 	LCD_Line(x2, y2, x3, y3, size, color24);
 	LCD_Line(x3, y3, x1, y1, size, color24);
@@ -90,8 +81,7 @@ void LCD_Triangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x
 
 #define ABS(x) ((x) > 0 ? (x) : -(x))
 
-void LCD_Triangle_Fill(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint32_t color24)
-{
+void LCD_Triangle_Fill(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint32_t color24) {
 	int16_t deltax = 0, deltay = 0, x = 0, y = 0, xinc1 = 0, xinc2 = 0, 
 	yinc1 = 0, yinc2 = 0, den = 0, num = 0, numadd = 0, numpixels = 0, 
 	curpixel = 0;
@@ -158,16 +148,14 @@ void LCD_Triangle_Fill(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint1
 	}
 }
 
-void LCD_Rect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint8_t size, uint32_t color24)
-{
+void LCD_Rect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint8_t size, uint32_t color24) {
 	LCD_Line(x, y, x + w, y, size, color24);
 	LCD_Line(x, y + h, x + w, y + h, size, color24);
 	LCD_Line(x, y, x, y + h, size, color24);
 	LCD_Line(x + w, y, x + w, y + h, size, color24);
 }
 
-void LCD_Ellipse(int16_t x0, int16_t y0, int16_t rx, int16_t ry, uint8_t fill, uint8_t size, uint32_t color24)
-{
+void LCD_Ellipse(int16_t x0, int16_t y0, int16_t rx, int16_t ry, uint8_t fill, uint8_t size, uint32_t color24) {
 	int16_t x, y;
 	int32_t rx2 = rx * rx;
 	int32_t ry2 = ry * ry;
@@ -230,8 +218,7 @@ void LCD_Ellipse(int16_t x0, int16_t y0, int16_t rx, int16_t ry, uint8_t fill, u
 	}
 }
 
-void LCD_Circle(uint16_t x, uint16_t y, uint8_t radius, uint8_t fill, uint8_t size, uint32_t color24)
-{
+void LCD_Circle(uint16_t x, uint16_t y, uint8_t radius, uint8_t fill, uint8_t size, uint32_t color24) {
 	int a_, b_, P;
 	a_ = 0;
 	b_ = radius;
@@ -268,8 +255,7 @@ void LCD_Circle(uint16_t x, uint16_t y, uint8_t radius, uint8_t fill, uint8_t si
 	}
 }
 
-void LCD_Circle_Helper(int16_t x0, int16_t y0, int16_t r, uint8_t cornername, uint8_t size, uint32_t color24)
-{
+void LCD_Circle_Helper(int16_t x0, int16_t y0, int16_t r, uint8_t cornername, uint8_t size, uint32_t color24) {
 	int16_t f = 1 - r;
 	int16_t ddF_x = 1;
 	int16_t ddF_y = -2 * r;
@@ -304,8 +290,7 @@ void LCD_Circle_Helper(int16_t x0, int16_t y0, int16_t r, uint8_t cornername, ui
 	}
 }
 
-void LCD_Rect_Round(uint16_t x, uint16_t y, uint16_t length, uint16_t width, uint16_t r, uint8_t size, uint32_t color24)
-{
+void LCD_Rect_Round(uint16_t x, uint16_t y, uint16_t length, uint16_t width, uint16_t r, uint8_t size, uint32_t color24) {
 	LCD_Line(x + (r + 2), y, x + length + size - (r + 2), y, size, color24);
 	LCD_Line(x + (r + 2), y + width - 1, x + length + size - (r + 2), y + width - 1, size, color24);
 	LCD_Line(x, y + (r + 2), x, y + width - size - (r + 2), size, color24);
@@ -317,8 +302,7 @@ void LCD_Rect_Round(uint16_t x, uint16_t y, uint16_t length, uint16_t width, uin
 	LCD_Circle_Helper(x + (r + 2), y + width - (r + 2) - 1, (r + 2), 8, size, color24);
 }
 
-void LCD_Circle_Fill_Helper(int16_t x0, int16_t y0, int16_t r, uint8_t cornername, int16_t delta, uint32_t color24)
-{
+void LCD_Circle_Fill_Helper(int16_t x0, int16_t y0, int16_t r, uint8_t cornername, int16_t delta, uint32_t color24) {
 	int16_t f = 1 - r;
 	int16_t ddF_x = 1;
 	int16_t ddF_y = -2 * r;
@@ -346,15 +330,13 @@ void LCD_Circle_Fill_Helper(int16_t x0, int16_t y0, int16_t r, uint8_t cornernam
 	}
 }
 
-void LCD_Rect_Round_Fill(uint16_t x, uint16_t y, uint16_t length, uint16_t width, uint16_t r, uint32_t color24)
-{
+void LCD_Rect_Round_Fill(uint16_t x, uint16_t y, uint16_t length, uint16_t width, uint16_t r, uint32_t color24) {
 	LCD_Rect_Fill(x + r, y, length - 2 * r, width, color24);
 	LCD_Circle_Fill_Helper(x + length - r - 1, y + r, r, 1, width - 2 * r - 1, color24);
 	LCD_Circle_Fill_Helper(x + r, y + r, r, 2, width - 2 * r - 1, color24);
 }
 
-static void LCD_Char(int16_t x, int16_t y, const GFXglyph *glyph, const GFXfont *font, uint8_t size, uint32_t color24)
-{
+static void LCD_Char(int16_t x, int16_t y, const GFXglyph *glyph, const GFXfont *font, uint8_t size, uint32_t color24) {
 	uint8_t  *bitmap = font -> bitmap;
 	uint16_t bo = glyph -> bitmapOffset;
 	uint8_t bits = 0, bit = 0;
@@ -388,8 +370,7 @@ static void LCD_Char(int16_t x, int16_t y, const GFXglyph *glyph, const GFXfont 
 	}
 }
 
-void LCD_Font(uint16_t x, uint16_t y, const char *text, const GFXfont *p_font, uint8_t size, uint32_t color24)
-{
+void LCD_Font(uint16_t x, uint16_t y, const char *text, const GFXfont *p_font, uint8_t size, uint32_t color24) {
 	int16_t cursor_x = x;
 	int16_t cursor_y = y;
 	GFXfont font;
@@ -412,8 +393,7 @@ void LCD_Font(uint16_t x, uint16_t y, const char *text, const GFXfont *p_font, u
 	}
 }
 
-void LCD_Init(void)
-{
+void LCD_Init(void) {
 	//1. Power up the system platform and assert the RESET# signal (‘L’ state) for a minimum of 100us to reset the controller. 
 	//		LCD_RST_SET
 	//    HAL_Delay (100);
@@ -503,8 +483,7 @@ void LCD_Init(void)
 	LCD_Send_Cmd(LCD_DISPLAY_ON);     // display on 
 }
 
-void LCD_Bright(uint8_t bright)
-{
+void LCD_Bright(uint8_t bright) {
 	LCD_Send_Cmd(0xBE);  // PWM configuration 
 	LCD_Send_Dat(0x08);     // set PWM signal frequency to 170Hz when PLL frequency is 100MHz 
 	LCD_Send_Dat(bright);   // PWM duty cycle  

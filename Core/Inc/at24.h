@@ -4,9 +4,45 @@
 #include "stm32f4xx_hal.h"
 #include <stdio.h>
 
-#define AT24XX_I2C				hi2c1
-#define AT24XX_ADDRESS			0x57 // 0x50 0x57
+#define AT24XX_I2C	hi2c1
+
+#define A0 0
+#define A1 0
+#define A2 0
+
 #define AT24XX_SIZE_KBIT		32
+
+#if (A0 == 1 && A1 == 1 && A2 == 1)
+#define AT24XX_ADDRESS	0x50
+#endif
+
+#if (A0 == 0 && A1 == 1 && A2 == 1)
+#define AT24XX_ADDRESS	0x51
+#endif
+
+#if (A0 == 1 && A1 == 0 && A2 == 1)
+#define AT24XX_ADDRESS	0x52
+#endif
+
+#if (A0 == 0 && A1 == 0 && A2 == 1)
+#define AT24XX_ADDRESS	0x53
+#endif
+
+#if (A0 == 1 && A1 == 1 && A2 == 0)
+#define AT24XX_ADDRESS	0x54
+#endif
+
+#if (A0 == 0 && A1 == 1 && A2 == 0)
+#define AT24XX_ADDRESS	0x55
+#endif
+
+#if (A0 == 1 && A1 == 0 && A2 == 0)
+#define AT24XX_ADDRESS	0x56
+#endif
+
+#if (A0 == 0 && A1 == 0 && A2 == 0)
+#define AT24XX_ADDRESS	0x57
+#endif
 
 uint8_t AT24XX_IsConnected(void);
 
