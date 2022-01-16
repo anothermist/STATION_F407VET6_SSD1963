@@ -111,7 +111,7 @@ uint8_t rtcSec, rtcMin, rtcHrs, rtcDay, rtcDate, rtcMonth, rtcYear;
 uint8_t rtcSecLast = 61, rtcMinLast = 61, rtcHrsLast = 25, rtcDayLast, rtcDateLast, rtcMonthLast, rtcYearLast;
 double temperature, temperatureLast, humidity, humidityLast, temperatureRemote, temperatureRemoteLast, humidityRemote, humidityRemoteLast;
 uint16_t pressure, pressureLast, remoteSensorLastUpdate = WAIT_REMOTE_SENSOR_SEC + 1;
-int16_t hT[155], hH[155], hP[155];
+int16_t hT[500], hH[500], hP[500];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -233,9 +233,9 @@ int main(void)
 	//	W25Q_Load_Page(15, flashOUT, 10);
 	//	HAL_UART_Transmit(&huart1, flashOUT, sizeof(flashOUT), 100);
 
-	for (uint16_t i = 0; i < 499; i++) hT[i] = byteS(AT24XX_Read(i * 2 + 1000), AT24XX_Read(i * 2 + 1 + 1000));
-	for (uint16_t i = 0; i < 499; i++) hH[i] = byteS(AT24XX_Read(i * 2 + 2000), AT24XX_Read(i * 2 + 1 + 2000));
-	for (uint16_t i = 0; i < 499; i++) hP[i] = byteS(AT24XX_Read(i * 2 + 3000), AT24XX_Read(i * 2 + 1 + 3000));
+	for (uint16_t i = 0; i < 499; i++) hT[i] =  byteS(AT24XX_Read(i * 2 + 1000), AT24XX_Read(i * 2 + 1 + 1000));
+	for (uint16_t i = 0; i < 499; i++) hH[i] =  byteS(AT24XX_Read(i * 2 + 2000), AT24XX_Read(i * 2 + 1 + 2000));
+	for (uint16_t i = 0; i < 499; i++) hP[i] =  byteS(AT24XX_Read(i * 2 + 3000), AT24XX_Read(i * 2 + 1 + 3000));
 
 	//	HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
 
@@ -254,7 +254,7 @@ int main(void)
 	//	for (uint32_t i = 0; i <= 65536; i++) TIM1->CCR1 = i;
 
 
-	//	for (uint16_t i = 0; i < 4096; i++) AT24XX_Update(i, 0);
+	//		for (uint16_t i = 0; i < 4096; i++) AT24XX_Update(i, 0);
 	//		DS3231_setHrs(13);
 	//		DS3231_setMin(50);
 	//		DS3231_setSec(0);
@@ -284,12 +284,12 @@ int main(void)
 		} else
 			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, GPIO_PIN_RESET);
 
-
-
-		//		if (millis / 1000 % 2 == 0)
-		////		else
-		//			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, GPIO_PIN_RESET);
 		rtcSec = DS3231_getSec();
+
+		if (rtcSec % 2 == 0)
+			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, GPIO_PIN_SET);
+		else
+			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, GPIO_PIN_RESET);
 
 		char clockPrint[13];
 
@@ -297,17 +297,22 @@ int main(void)
 
 			rtcMin = DS3231_getMin();
 
-			LCD_Circle(170, 35, 8, 0, 1, ORANGE);
-			LCD_Circle(170, 75, 8, 0, 1, ORANGE);
+			sprintf(clockPrint, "%02d", rtcSecLast);
+			LCD_Font(575, 40, clockPrint, &DejaVu_Sans_48, 1, BLACK);
+			sprintf(clockPrint, "%02d", rtcSec);
+			LCD_Font(575, 40, clockPrint, &DejaVu_Sans_48, 1, ORANGE);
+
+			LCD_Circle(300, 60, 10, 0, 1, ORANGE);
+			LCD_Circle(300, 120, 10, 0, 1, ORANGE);
 
 			if (rtcSec % 2 != 0) {
-				LCD_Circle(170, 35, 7, 1, 1, ORANGE);
-				LCD_Circle(170, 75, 7, 1, 1, ORANGE);
+				LCD_Circle(300, 60, 9, 1, 1, ORANGE);
+				LCD_Circle(300, 120, 9, 1, 1, ORANGE);
 				HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
 			}
 			else {
-				LCD_Circle(170, 35, 7, 1, 1, BLACK);
-				LCD_Circle(170, 75, 7, 1, 1, BLACK);
+				LCD_Circle(300, 60, 9, 1, 1, BLACK);
+				LCD_Circle(300, 120, 9, 1, 1, BLACK);
 				HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET);
 			}
 
@@ -316,9 +321,9 @@ int main(void)
 				rtcHrs = DS3231_getHrs();
 
 				sprintf(clockPrint, "%02d", rtcMinLast);
-				LCD_Font(178, 100, clockPrint, &DejaVu_Sans_128, 1, BLACK);
+				LCD_Font(300, 175, clockPrint, &DejaVu_Sans_112, 2, BLACK);
 				sprintf(clockPrint, "%02d", rtcMin);
-				LCD_Font(178, 100, clockPrint, &DejaVu_Sans_128, 1, ORANGE);
+				LCD_Font(300, 175, clockPrint, &DejaVu_Sans_112, 2, ORANGE);
 
 				if (rtcHrsLast != rtcHrs) {
 
@@ -328,25 +333,25 @@ int main(void)
 					rtcYear = DS3231_getYear();
 
 					sprintf(clockPrint, "%02d", rtcHrsLast);
-					LCD_Font(0, 100, clockPrint, &DejaVu_Sans_128, 1, BLACK);
+					LCD_Font(0, 175, clockPrint, &DejaVu_Sans_112, 2, BLACK);
 					sprintf(clockPrint, "%02d", rtcHrs);
-					LCD_Font(0, 100, clockPrint, &DejaVu_Sans_128, 1, ORANGE);
+					LCD_Font(0, 175, clockPrint, &DejaVu_Sans_112, 2, ORANGE);
 
 					if (rtcDayLast != rtcDay) {
 
 						static const char* days[7] = { "MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN" };
-						LCD_Font(5, 140, days[(7 + rtcDay - 2) % 7], &DejaVu_Sans_48, 1, BLACK);
-						LCD_Font(5, 140, days[(7 + rtcDay - 1) % 7], &DejaVu_Sans_48, 1, BLUE);
+						LCD_Font(700, 50, days[(7 + rtcDay - 2) % 7], &DejaVu_Sans_48, 1, BLACK);
+						LCD_Font(700, 50, days[(7 + rtcDay - 1) % 7], &DejaVu_Sans_48, 1, BLUE);
 
 						static const char* months[12] = { "JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC" };
 
-						LCD_Font(150, 140, months[(12 + rtcMonth - 2) % 12], &DejaVu_Sans_48, 1, BLACK);
-						LCD_Font(150, 140, months[(12 + rtcMonth - 1) % 12], &DejaVu_Sans_48, 1, CYAN);
+						LCD_Font(700, 100, months[(12 + rtcMonth - 2) % 12], &DejaVu_Sans_48, 1, BLACK);
+						LCD_Font(700, 100, months[(12 + rtcMonth - 1) % 12], &DejaVu_Sans_48, 1, CYAN);
 
-						sprintf(clockPrint, "%02d-%02d-%02d", rtcDateLast, rtcMonthLast, rtcYearLast);
-						LCD_Font(250, 140, clockPrint, &DejaVu_Sans_48, 1, BLACK);
-						sprintf(clockPrint, "%02d-%02d-%02d", rtcDate, rtcMonth, rtcYear);
-						LCD_Font(250, 140, clockPrint, &DejaVu_Sans_48, 1, CYAN);
+						sprintf(clockPrint, "%02d.%02d.%02d", rtcDateLast, rtcMonthLast, rtcYearLast);
+						LCD_Font(575, 175, clockPrint, &DejaVu_Sans_48, 1, BLACK);
+						sprintf(clockPrint, "%02d.%02d.%02d", rtcDate, rtcMonth, rtcYear);
+						LCD_Font(575, 175, clockPrint, &DejaVu_Sans_48, 1, CYAN);
 
 						rtcDayLast = rtcDay;
 						rtcDateLast = rtcDate;
@@ -368,28 +373,28 @@ int main(void)
 
 						if (temperatureLast >= 10 || (temperatureLast < 0 && temperatureLast > -10)) {
 							sprintf(weatherPrintT, "%.1f'C", temperatureLast);
-							LCD_Font(1, 187, weatherPrintT, &DejaVu_Sans_48, 1, BLACK);
+							LCD_Font(1, 220, weatherPrintT, &DejaVu_Sans_48, 1, BLACK);
 						}
 						else if (temperatureLast < 10 && temperatureLast > 0) {
 							sprintf(weatherPrintT, "%.1f'C", temperatureLast);
-							LCD_Font(27, 187, weatherPrintT, &DejaVu_Sans_48, 1, BLACK);
+							LCD_Font(27, 220, weatherPrintT, &DejaVu_Sans_48, 1, BLACK);
 						}
 						else if (temperatureLast <= -10) {
 							sprintf(weatherPrintT, "%2d'C", (int8_t)temperatureLast);
-							LCD_Font(1, 187, weatherPrintT, &DejaVu_Sans_48, 1, BLACK);
+							LCD_Font(1, 220, weatherPrintT, &DejaVu_Sans_48, 1, BLACK);
 						}
 
 						if (temperature >= 10 || (temperature < 0 && temperature > -10)) {
 							sprintf(weatherPrintT, "%.1f'C", temperature);
-							LCD_Font(1, 187, weatherPrintT, &DejaVu_Sans_48, 1, ORANGE);
+							LCD_Font(1, 220, weatherPrintT, &DejaVu_Sans_48, 1, ORANGE);
 						}
 						else if (temperature < 10 && temperature > 0) {
 							sprintf(weatherPrintT, "%.1f'C", temperature);
-							LCD_Font(27, 187, weatherPrintT, &DejaVu_Sans_48, 1, ORANGE);
+							LCD_Font(27, 220, weatherPrintT, &DejaVu_Sans_48, 1, ORANGE);
 						}
 						else if (temperature <= -10) {
 							sprintf(weatherPrintT, "%2d'C", (int8_t)temperature);
-							LCD_Font(1, 187, weatherPrintT, &DejaVu_Sans_48, 1, ORANGE);
+							LCD_Font(1, 220, weatherPrintT, &DejaVu_Sans_48, 1, ORANGE);
 						}
 
 						temperatureLast = temperature;
@@ -401,13 +406,13 @@ int main(void)
 
 						sprintf(weatherPrintH, "%.1f'H", humidityLast);
 						if (humidityLast >= 10)
-							LCD_Font(160, 187, weatherPrintH, &DejaVu_Sans_48, 1, BLACK);
-						else LCD_Font(186, 187, weatherPrintH, &DejaVu_Sans_48, 1, BLACK);
+							LCD_Font(160, 220, weatherPrintH, &DejaVu_Sans_48, 1, BLACK);
+						else LCD_Font(186, 220, weatherPrintH, &DejaVu_Sans_48, 1, BLACK);
 
 						sprintf(weatherPrintH, "%.1f'H", humidity);
 						if (humidity >= 10)
-							LCD_Font(160, 187, weatherPrintH, &DejaVu_Sans_48, 1, CYAN);
-						else LCD_Font(186, 187, weatherPrintH, &DejaVu_Sans_48, 1, CYAN);
+							LCD_Font(160, 220, weatherPrintH, &DejaVu_Sans_48, 1, CYAN);
+						else LCD_Font(186, 220, weatherPrintH, &DejaVu_Sans_48, 1, CYAN);
 
 						humidityLast = humidity;
 					}
@@ -418,22 +423,22 @@ int main(void)
 
 						if (pressureLast >= 1000) {
 							sprintf(weatherPrintP, "%02dP", pressureLast);
-							LCD_Font(320, 187, weatherPrintP, &DejaVu_Sans_48, 1, BLACK);
+							LCD_Font(320, 220, weatherPrintP, &DejaVu_Sans_48, 1, BLACK);
 						}
 						else {
 							sprintf(weatherPrintP, " %02dP", pressureLast);
-							LCD_Font(320, 187, weatherPrintP, &DejaVu_Sans_48, 1, BLACK);
+							LCD_Font(320, 220, weatherPrintP, &DejaVu_Sans_48, 1, BLACK);
 						}
 
 						pressureLast = pressure;
 
 						if (pressureLast >= 1000) {
 							sprintf(weatherPrintP, "%02dP", pressureLast);
-							LCD_Font(320, 187, weatherPrintP, &DejaVu_Sans_48, 1, GREEN);
+							LCD_Font(320, 220, weatherPrintP, &DejaVu_Sans_48, 1, GREEN);
 						}
 						else {
 							sprintf(weatherPrintP, " %02dP", pressureLast);
-							LCD_Font(320, 187, weatherPrintP, &DejaVu_Sans_48, 1, GREEN);
+							LCD_Font(320, 220, weatherPrintP, &DejaVu_Sans_48, 1, GREEN);
 						}
 					}
 
@@ -441,7 +446,7 @@ int main(void)
 
 						AT24XX_Update(0, rtcHrs);
 
-						for (uint16_t i = 0; i < 499; i++) hT[i] = byteS(AT24XX_Read(i * 2 + 1000), AT24XX_Read(i * 2 + 1 + 1000));
+						for (uint16_t i = 0; i < 499; i++) hT[i] = 0; //byteS(AT24XX_Read(i * 2 + 1000), AT24XX_Read(i * 2 + 1 + 1000));
 						for (uint16_t i = 498; i > 0; i--) hT[i] = hT[i - 1];
 						hT[0] = (uint16_t) (temperature * 10);
 
@@ -450,7 +455,7 @@ int main(void)
 							AT24XX_Update(i * 2 + 1 + 1000, byteH(hT[i]));
 						}
 
-						for (uint16_t i = 0; i < 499; i++) hH[i] = byteS(AT24XX_Read(i * 2 + 2000), AT24XX_Read(i * 2 + 1 + 2000));
+						for (uint16_t i = 0; i < 499; i++) hH[i] = 0; //byteS(AT24XX_Read(i * 2 + 2000), AT24XX_Read(i * 2 + 1 + 2000));
 						for (uint16_t i = 498; i > 0; i--) hH[i] = hH[i - 1];
 						hH[0] = (uint16_t) (humidity * 10);
 
@@ -459,7 +464,7 @@ int main(void)
 							AT24XX_Update(i * 2 + 1 + 2000, byteH(hH[i]));
 						}
 
-						for (uint16_t i = 0; i < 499; i++) hP[i] = byteS(AT24XX_Read(i * 2 + 3000), AT24XX_Read(i * 2 + 1 + 3000));
+						for (uint16_t i = 0; i < 499; i++) hP[i] = 0; //byteS(AT24XX_Read(i * 2 + 3000), AT24XX_Read(i * 2 + 1 + 3000));
 						for (uint16_t i = 498; i > 0; i--) hP[i] = hP[i - 1];
 						hP[0] = (uint16_t) (pressure * 10);
 
@@ -477,8 +482,8 @@ int main(void)
 					if (valMap > 255) valMap = 255;
 					LCD_Line(2 + 263, 223, 2 + 263, 477, 1, BLACK);
 					if (valMap)
-					LCD_Line(2 + 263, 223 + (255 - valMap), 2 + 263, 477, 1,
-							RGB(255 - (255 - valMap), 0, 255 - (255 - (255 - valMap))));
+						LCD_Line(2 + 263, 223 + (255 - valMap), 2 + 263, 477, 1,
+								RGB(255 - (255 - valMap), 0, 255 - (255 - (255 - valMap))));
 
 					LCD_Rect(267, 222, 265, 256, 1, BLUE);
 					valMap = map(((int16_t)(humidity * 10)), MIN_HUMIDITY_X10, MAX_HUMIDITY_X10, 0, 255);
@@ -486,8 +491,8 @@ int main(void)
 					if (valMap > 255) valMap = 255;
 					LCD_Line(268 + 263, 223, 268 + 263, 477, 1, BLACK);
 					if (valMap)
-					LCD_Line(268 + 263, 223 + (255 - valMap), 268 + 263, 477, 1,
-							RGB(255 - (255 - valMap), 0, 255 - (255 - (255 - valMap))));
+						LCD_Line(268 + 263, 223 + (255 - valMap), 268 + 263, 477, 1,
+								RGB(255 - (255 - valMap), 0, 255 - (255 - (255 - valMap))));
 
 					LCD_Rect(533, 222, 265, 256, 1, BLUE);
 					valMap = map(((int16_t)(pressure * 10)), MIN_PRESSURE_X10, MAX_PRESSURE_X10, 0, 255);
@@ -495,8 +500,8 @@ int main(void)
 					if (valMap > 255) valMap = 255;
 					LCD_Line(534 + 263, 223, 534 + 263, 477, 1, BLACK);
 					if (valMap)
-					LCD_Line(534 + 263, 223 + (255 - valMap), 534 + 263, 477, 1,
-							RGB(255 - (255 - valMap), 0, 255 - (255 - (255 - valMap))));
+						LCD_Line(534 + 263, 223 + (255 - valMap), 534 + 263, 477, 1,
+								RGB(255 - (255 - valMap), 0, 255 - (255 - (255 - valMap))));
 
 					if (!viewGraphs) {
 
@@ -506,8 +511,8 @@ int main(void)
 							if (valMap > 255) valMap = 255;
 							LCD_Line(2 + (262 - i), 223, 2 + (262 - i), 477, 1, BLACK);
 							if (valMap)
-							LCD_Line(2 + (262 - i), 223 + (255 - valMap), 2 + (262 - i), 477, 1,
-									RGB(255 - (255 - valMap), 0, 255 - (255 - (255 - valMap))));
+								LCD_Line(2 + (262 - i), 223 + (255 - valMap), 2 + (262 - i), 477, 1,
+										RGB(255 - (255 - valMap), 0, 255 - (255 - (255 - valMap))));
 						}
 
 						for (uint16_t i = 0; i < 263 ; i++) {
@@ -516,8 +521,8 @@ int main(void)
 							if (valMap > 255) valMap = 255;
 							LCD_Line(268 + (262 - i), 223, 268 + (262 - i), 477, 1, BLACK);
 							if (valMap)
-							LCD_Line(268 + (262 - i), 223 + (255 - valMap), 268 + (262 - i), 477, 1,
-									RGB(255 - (255 - valMap), 0, 255 - (255 - (255 - valMap))));
+								LCD_Line(268 + (262 - i), 223 + (255 - valMap), 268 + (262 - i), 477, 1,
+										RGB(255 - (255 - valMap), 0, 255 - (255 - (255 - valMap))));
 						}
 
 						for (uint16_t i = 0; i < 263 ; i++) {
@@ -526,11 +531,11 @@ int main(void)
 							if (valMap > 255) valMap = 255;
 							LCD_Line(534 + (262 - i), 223, 534 + (262 - i), 477, 1, BLACK);
 							if (valMap)
-							LCD_Line(534 + (262 - i), 223 + (255 - valMap), 534 + (262 - i), 477, 1,
-									RGB(255 - (255 - valMap), 0, 255 - (255 - (255 - valMap))));
+								LCD_Line(534 + (262 - i), 223 + (255 - valMap), 534 + (262 - i), 477, 1,
+										RGB(255 - (255 - valMap), 0, 255 - (255 - (255 - valMap))));
 						}
 
-						for (uint32_t i = 0; i <= 65536; i++) TIM1->CCR1 = i;
+						//						for (uint32_t i = 0; i <= 65536; i++) TIM1->CCR1 = i;
 						viewGraphs = 1;
 					}
 				}
@@ -702,11 +707,6 @@ int main(void)
 					temperatureRemoteLast = 0;
 					humidityRemoteLast = 0;
 				}
-
-				sprintf(clockPrint, "%02d", rtcSecLast);
-				LCD_Font(375, 40, clockPrint, &DejaVu_Sans_48, 1, BLACK);
-				sprintf(clockPrint, "%02d", rtcSec);
-				LCD_Font(375, 40, clockPrint, &DejaVu_Sans_48, 1, ORANGE);
 			}
 			rtcSecLast = rtcSec;
 		}
