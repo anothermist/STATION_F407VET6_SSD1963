@@ -58,14 +58,14 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define MIN_TEMPERATURE_X10 226
-#define MAX_TEMPERATURE_X10 290
+#define MIN_TEMPERATURE_X10 200
+#define MAX_TEMPERATURE_X10 328
 
-#define MIN_HUMIDITY_X10 80
-#define MAX_HUMIDITY_X10 720
+#define MIN_HUMIDITY_X10 100
+#define MAX_HUMIDITY_X10 868
 
-#define MIN_PRESSURE 937
-#define MAX_PRESSURE 1065
+#define MIN_PRESSURE_X10 9370
+#define MAX_PRESSURE_X10 10650
 
 #define UART_RX_BUFFER_SIZE 16
 #define UART_TX_BUFFER_SIZE 10000
@@ -233,9 +233,9 @@ int main(void)
 	//	W25Q_Load_Page(15, flashOUT, 10);
 	//	HAL_UART_Transmit(&huart1, flashOUT, sizeof(flashOUT), 100);
 
-	for (uint16_t i = 0; i < 263; i++) hT[i] = byteS(AT24XX_Read(i * 2 + 1000), AT24XX_Read(i * 2 + 1 + 1000));
-	for (uint16_t i = 0; i < 263; i++) hH[i] = byteS(AT24XX_Read(i * 2 + 2000), AT24XX_Read(i * 2 + 1 + 2000));
-	for (uint16_t i = 0; i < 263; i++) hP[i] = byteS(AT24XX_Read(i * 2 + 3000), AT24XX_Read(i * 2 + 1 + 3000));
+	for (uint16_t i = 0; i < 499; i++) hT[i] = byteS(AT24XX_Read(i * 2 + 1000), AT24XX_Read(i * 2 + 1 + 1000));
+	for (uint16_t i = 0; i < 499; i++) hH[i] = byteS(AT24XX_Read(i * 2 + 2000), AT24XX_Read(i * 2 + 1 + 2000));
+	for (uint16_t i = 0; i < 499; i++) hP[i] = byteS(AT24XX_Read(i * 2 + 3000), AT24XX_Read(i * 2 + 1 + 3000));
 
 	//	HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
 
@@ -441,29 +441,29 @@ int main(void)
 
 						AT24XX_Update(0, rtcHrs);
 
-						for (uint16_t i = 0; i < 155; i++) hT[i] = byteS(AT24XX_Read(i * 2 + 1000), AT24XX_Read(i * 2 + 1 + 1000));
-						for (uint16_t i = 154; i > 0; i--) hT[i] = hT[i - 1];
+						for (uint16_t i = 0; i < 499; i++) hT[i] = byteS(AT24XX_Read(i * 2 + 1000), AT24XX_Read(i * 2 + 1 + 1000));
+						for (uint16_t i = 498; i > 0; i--) hT[i] = hT[i - 1];
 						hT[0] = (uint16_t) (temperature * 10);
 
-						for (uint16_t i = 0; i < 155; i++) {
+						for (uint16_t i = 0; i < 499; i++) {
 							AT24XX_Update(i * 2 + 1000, byteL(hT[i]));
 							AT24XX_Update(i * 2 + 1 + 1000, byteH(hT[i]));
 						}
 
-						for (uint16_t i = 0; i < 155; i++) hH[i] = byteS(AT24XX_Read(i * 2 + 2000), AT24XX_Read(i * 2 + 1 + 2000));
-						for (uint16_t i = 154; i > 0; i--) hH[i] = hH[i - 1];
+						for (uint16_t i = 0; i < 499; i++) hH[i] = byteS(AT24XX_Read(i * 2 + 2000), AT24XX_Read(i * 2 + 1 + 2000));
+						for (uint16_t i = 498; i > 0; i--) hH[i] = hH[i - 1];
 						hH[0] = (uint16_t) (humidity * 10);
 
-						for (uint16_t i = 0; i < 155; i++) {
+						for (uint16_t i = 0; i < 499; i++) {
 							AT24XX_Update(i * 2 + 2000, byteL(hH[i]));
 							AT24XX_Update(i * 2 + 1 + 2000, byteH(hH[i]));
 						}
 
-						for (uint16_t i = 0; i < 155; i++) hP[i] = byteS(AT24XX_Read(i * 2 + 3000), AT24XX_Read(i * 2 + 1 + 3000));
-						for (uint16_t i = 154; i > 0; i--) hP[i] = hP[i - 1];
-						hP[0] = (uint16_t)pressure;
+						for (uint16_t i = 0; i < 499; i++) hP[i] = byteS(AT24XX_Read(i * 2 + 3000), AT24XX_Read(i * 2 + 1 + 3000));
+						for (uint16_t i = 498; i > 0; i--) hP[i] = hP[i - 1];
+						hP[0] = (uint16_t) (pressure * 10);
 
-						for (uint16_t i = 0; i < 155; i++) {
+						for (uint16_t i = 0; i < 499; i++) {
 							AT24XX_Update(i * 2 + 3000, byteL(hP[i]));
 							AT24XX_Update(i * 2 + 1 + 3000, byteH(hP[i]));
 						}
@@ -471,60 +471,63 @@ int main(void)
 						viewGraphs = 0;
 					}
 
-					//					LCD_Rect(2, 189, 157, 129, 1, BLUE);
-					LCD_Rect(1, 221, 265, 257, 1, BLUE);
-					int16_t valMap = map(((int16_t)(temperature * 10)), MIN_TEMPERATURE_X10, MAX_TEMPERATURE_X10, 0, 128);
+					LCD_Rect(1, 222, 265, 256, 1, BLUE);
+					int16_t valMap = map(((int16_t)(temperature * 10)), MIN_TEMPERATURE_X10, MAX_TEMPERATURE_X10, 0, 255);
 					if (valMap < 0) valMap = 0;
-					if (valMap > 127) valMap = 127;
-					LCD_Line(3 + 155, 191, 3 + 155, 317, 1, BLACK);
-					if (valMap) LCD_Line(3 + 155, 191 + (127 - valMap), 3 + 155, 317,
-							1, RGB(255 - ((127 - valMap) * 2), 0, 255 - (255 - ((127 - valMap) * 2))));
+					if (valMap > 255) valMap = 255;
+					LCD_Line(2 + 263, 223, 2 + 263, 477, 1, BLACK);
+					if (valMap)
+					LCD_Line(2 + 263, 223 + (255 - valMap), 2 + 263, 477, 1,
+							RGB(255 - (255 - valMap), 0, 255 - (255 - (255 - valMap))));
 
-					//					LCD_Rect(161, 189, 157, 129, 1, BLUE);
-					LCD_Rect(267, 221, 265, 257, 1, BLUE);
-					valMap = map(((int16_t)(humidity * 10)), MIN_HUMIDITY_X10, MAX_HUMIDITY_X10, 0, 128);
+					LCD_Rect(267, 222, 265, 256, 1, BLUE);
+					valMap = map(((int16_t)(humidity * 10)), MIN_HUMIDITY_X10, MAX_HUMIDITY_X10, 0, 255);
 					if (valMap < 0) valMap = 0;
-					if (valMap > 127) valMap = 127;
-					LCD_Line(162 + 155, 191, 162 + 155, 317, 1, BLACK);
-					if (valMap) LCD_Line(162 + 155, 191 + (127 - valMap), 162 + 155, 317,
-							1, RGB(255 - ((127 - valMap) * 2), 0, 255 - (255 - ((127 - valMap) * 2))));
+					if (valMap > 255) valMap = 255;
+					LCD_Line(268 + 263, 223, 268 + 263, 477, 1, BLACK);
+					if (valMap)
+					LCD_Line(268 + 263, 223 + (255 - valMap), 268 + 263, 477, 1,
+							RGB(255 - (255 - valMap), 0, 255 - (255 - (255 - valMap))));
 
-					//					LCD_Rect(320, 189, 157, 129, 1, BLUE);
-					LCD_Rect(533, 221, 265, 257, 1, BLUE);
-					valMap = map(((int16_t)(pressure)), MIN_PRESSURE, MAX_PRESSURE, 0, 128);
+					LCD_Rect(533, 222, 265, 256, 1, BLUE);
+					valMap = map(((int16_t)(pressure * 10)), MIN_PRESSURE_X10, MAX_PRESSURE_X10, 0, 255);
 					if (valMap < 0) valMap = 0;
-					if (valMap > 127) valMap = 127;
-					LCD_Line(321 + 155, 191, 321 + 155, 317, 1, BLACK);
-					if (valMap) LCD_Line(321 + 155, 191 + (127 - valMap), 321 + 155, 317,
-							1, RGB(255 - ((127 - valMap) * 2), 0, 255 - (255 - ((127 - valMap) * 2))));
+					if (valMap > 255) valMap = 255;
+					LCD_Line(534 + 263, 223, 534 + 263, 477, 1, BLACK);
+					if (valMap)
+					LCD_Line(534 + 263, 223 + (255 - valMap), 534 + 263, 477, 1,
+							RGB(255 - (255 - valMap), 0, 255 - (255 - (255 - valMap))));
 
 					if (!viewGraphs) {
 
 						for (uint16_t i = 0; i < 263 ; i++) {
-							valMap = map(((int16_t)hT[i]), MIN_TEMPERATURE_X10, MAX_TEMPERATURE_X10, 0, 128);
+							valMap = map(((int16_t)hT[i]), MIN_TEMPERATURE_X10, MAX_TEMPERATURE_X10, 0, 255);
 							if (valMap < 0) valMap = 0;
-							if (valMap > 127) valMap = 127;
-							LCD_Line(2 + (262 - i), 222, 2 + (262 - i), 477, 1, BLACK);
-							if (valMap) LCD_Line(3 + (154 - i), 191 + (127 - valMap), 3 + (154 - i), 317,
-									1, RGB(255 - ((127 - valMap) * 2), 0, 255 - (255 - ((127 - valMap) * 2))));
+							if (valMap > 255) valMap = 255;
+							LCD_Line(2 + (262 - i), 223, 2 + (262 - i), 477, 1, BLACK);
+							if (valMap)
+							LCD_Line(2 + (262 - i), 223 + (255 - valMap), 2 + (262 - i), 477, 1,
+									RGB(255 - (255 - valMap), 0, 255 - (255 - (255 - valMap))));
 						}
 
 						for (uint16_t i = 0; i < 263 ; i++) {
-							valMap = map(((int16_t)hH[i]), MIN_HUMIDITY_X10, MAX_HUMIDITY_X10, 0, 128);
+							valMap = map(((int16_t)hH[i]), MIN_HUMIDITY_X10, MAX_HUMIDITY_X10, 0, 255);
 							if (valMap < 0) valMap = 0;
-							if (valMap > 127) valMap = 127;
-							LCD_Line(268 + (262 - i), 222, 268 + (262 - i), 477, 1, BLACK);
-							if (valMap) LCD_Line(162 + (154 - i), 191 + (127 - valMap), 162 + (154 - i), 317,
-									1, RGB(255 - ((127 - valMap) * 2), 0, 255 - (255 - ((127 - valMap) * 2))));
+							if (valMap > 255) valMap = 255;
+							LCD_Line(268 + (262 - i), 223, 268 + (262 - i), 477, 1, BLACK);
+							if (valMap)
+							LCD_Line(268 + (262 - i), 223 + (255 - valMap), 268 + (262 - i), 477, 1,
+									RGB(255 - (255 - valMap), 0, 255 - (255 - (255 - valMap))));
 						}
 
 						for (uint16_t i = 0; i < 263 ; i++) {
-							valMap = map(((int16_t)hP[i]), MIN_PRESSURE, MAX_PRESSURE, 0, 128);
+							valMap = map(((int16_t)hP[i]), MIN_PRESSURE_X10, MAX_PRESSURE_X10, 0, 255);
 							if (valMap < 0) valMap = 0;
-							if (valMap > 127) valMap = 127;
-							LCD_Line(534 + (262 - i), 222, 534 + (262 - i), 477, 1, BLACK);
-							if (valMap) LCD_Line(321 + (154 - i), 191 + (127 - valMap), 321 + (154 - i), 317,
-									1, RGB(255 - ((127 - valMap) * 2), 0, 255 - (255 - ((127 - valMap) * 2))));
+							if (valMap > 255) valMap = 255;
+							LCD_Line(534 + (262 - i), 223, 534 + (262 - i), 477, 1, BLACK);
+							if (valMap)
+							LCD_Line(534 + (262 - i), 223 + (255 - valMap), 534 + (262 - i), 477, 1,
+									RGB(255 - (255 - valMap), 0, 255 - (255 - (255 - valMap))));
 						}
 
 						for (uint32_t i = 0; i <= 65536; i++) TIM1->CCR1 = i;
