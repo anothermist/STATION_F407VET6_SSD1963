@@ -26,6 +26,7 @@
 #include "string.h"
 #include "ssd1963.h"
 #include "xpt2046.h"
+#include "i2c_er.h"
 #include "bme280.h"
 #include "ds3231.h"
 #include "at24.h"
@@ -185,13 +186,12 @@ int main(void)
 	SystemClock_Config();
 
 	/* USER CODE BEGIN SysInit */
-	HAL_Delay(100);
-	__HAL_RCC_I2C1_CLK_ENABLE();
-	HAL_Delay(100);
-	//  __HAL_RCC_I2C1_FORCE_RESET();
-	//  HAL_Delay(100);
-	//  __HAL_RCC_I2C1_RELEASE_RESET();
-	//  HAL_Delay(100);
+//	__HAL_RCC_I2C1_CLK_ENABLE();
+//	HAL_Delay(100);
+//	__HAL_RCC_I2C1_FORCE_RESET();
+//	HAL_Delay(100);
+//	__HAL_RCC_I2C1_RELEASE_RESET();
+//	HAL_Delay(100);
 	/* USER CODE END SysInit */
 
 	/* Initialize all configured peripherals */
@@ -204,16 +204,10 @@ int main(void)
 	MX_SPI1_Init();
 	MX_I2C1_Init();
 	/* USER CODE BEGIN 2 */
-	//		HAL_Delay(100);
-	//		__HAL_RCC_I2C1_CLK_ENABLE();
-	//		HAL_Delay(100);
-	//	__HAL_RCC_I2C1_FORCE_RESET();
-	//	HAL_Delay(100);
-	//	__HAL_RCC_I2C1_RELEASE_RESET();
-	//	HAL_Delay(100);
-
 	uint8_t uartTransmit[] = "DEBUG UART OK\r\n";
 	HAL_UART_Transmit(&huart1, uartTransmit, sizeof(uartTransmit), 100);
+
+	I2C_ClearBusyFlagErratum(&hi2c1, 1000);
 
 	I2C_Scan(&hi2c1);
 	BME280_Init();
@@ -269,13 +263,13 @@ int main(void)
 	/* Infinite loop */
 	/* USER CODE BEGIN WHILE */
 	while (1) {
+		I2C_ClearBusyFlagErratum(&hi2c1, 1000);
 
 		if (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_5) == GPIO_PIN_SET) {
 
 			uint16_t touchX = getX();
 			uint16_t touchY = getY();
-			if (touchX && touchY && touchX != 0x0DB)
-			{
+			if (touchX && touchY && touchX != 0x0DB) {
 				LCD_Rect_Fill(touchX, touchY, 1, 1, WHITE);
 			}
 			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, GPIO_PIN_SET);
@@ -298,9 +292,9 @@ int main(void)
 			rtcMin = DS3231_getMin();
 
 			sprintf(clockPrint, "%02d", rtcSecLast);
-			LCD_Font(575, 40, clockPrint, &DejaVu_Sans_48, 1, BLACK);
+			LCD_Font(600, 40, clockPrint, &DejaVu_Sans_48, 1, BLACK);
 			sprintf(clockPrint, "%02d", rtcSec);
-			LCD_Font(575, 40, clockPrint, &DejaVu_Sans_48, 1, ORANGE);
+			LCD_Font(600, 40, clockPrint, &DejaVu_Sans_48, 1, ORANGE);
 
 			LCD_Circle(300, 60, 10, 0, 1, ORANGE);
 			LCD_Circle(300, 120, 10, 0, 1, ORANGE);
@@ -321,9 +315,9 @@ int main(void)
 				rtcHrs = DS3231_getHrs();
 
 				sprintf(clockPrint, "%02d", rtcMinLast);
-				LCD_Font(300, 175, clockPrint, &DejaVu_Sans_112, 2, BLACK);
+				LCD_Font(310, 175, clockPrint, &DejaVu_Sans_112, 2, BLACK);
 				sprintf(clockPrint, "%02d", rtcMin);
-				LCD_Font(300, 175, clockPrint, &DejaVu_Sans_112, 2, ORANGE);
+				LCD_Font(310, 175, clockPrint, &DejaVu_Sans_112, 2, ORANGE);
 
 				if (rtcHrsLast != rtcHrs) {
 
@@ -340,18 +334,18 @@ int main(void)
 					if (rtcDayLast != rtcDay) {
 
 						static const char* days[7] = { "MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN" };
-						LCD_Font(700, 50, days[(7 + rtcDay - 2) % 7], &DejaVu_Sans_48, 1, BLACK);
-						LCD_Font(700, 50, days[(7 + rtcDay - 1) % 7], &DejaVu_Sans_48, 1, BLUE);
+						LCD_Font(695, 125, days[(7 + rtcDay - 2) % 7], &DejaVu_Sans_48, 1, BLACK);
+						LCD_Font(695, 125, days[(7 + rtcDay - 1) % 7], &DejaVu_Sans_48, 1, CYAN);
 
 						static const char* months[12] = { "JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC" };
 
-						LCD_Font(700, 100, months[(12 + rtcMonth - 2) % 12], &DejaVu_Sans_48, 1, BLACK);
-						LCD_Font(700, 100, months[(12 + rtcMonth - 1) % 12], &DejaVu_Sans_48, 1, CYAN);
+						LCD_Font(600, 125, months[(12 + rtcMonth - 2) % 12], &DejaVu_Sans_48, 1, BLACK);
+						LCD_Font(600, 125, months[(12 + rtcMonth - 1) % 12], &DejaVu_Sans_48, 1, CYAN);
 
 						sprintf(clockPrint, "%02d.%02d.%02d", rtcDateLast, rtcMonthLast, rtcYearLast);
-						LCD_Font(575, 175, clockPrint, &DejaVu_Sans_48, 1, BLACK);
+						LCD_Font(578, 175, clockPrint, &DejaVu_Sans_48, 1, BLACK);
 						sprintf(clockPrint, "%02d.%02d.%02d", rtcDate, rtcMonth, rtcYear);
-						LCD_Font(575, 175, clockPrint, &DejaVu_Sans_48, 1, CYAN);
+						LCD_Font(578, 175, clockPrint, &DejaVu_Sans_48, 1, CYAN);
 
 						rtcDayLast = rtcDay;
 						rtcDateLast = rtcDate;
@@ -446,7 +440,7 @@ int main(void)
 
 						AT24XX_Update(0, rtcHrs);
 
-						for (uint16_t i = 0; i < 499; i++) hT[i] = 0; //byteS(AT24XX_Read(i * 2 + 1000), AT24XX_Read(i * 2 + 1 + 1000));
+						for (uint16_t i = 0; i < 499; i++) hT[i] = byteS(AT24XX_Read(i * 2 + 1000), AT24XX_Read(i * 2 + 1 + 1000));
 						for (uint16_t i = 498; i > 0; i--) hT[i] = hT[i - 1];
 						hT[0] = (uint16_t) (temperature * 10);
 
@@ -455,7 +449,7 @@ int main(void)
 							AT24XX_Update(i * 2 + 1 + 1000, byteH(hT[i]));
 						}
 
-						for (uint16_t i = 0; i < 499; i++) hH[i] = 0; //byteS(AT24XX_Read(i * 2 + 2000), AT24XX_Read(i * 2 + 1 + 2000));
+						for (uint16_t i = 0; i < 499; i++) hH[i] = byteS(AT24XX_Read(i * 2 + 2000), AT24XX_Read(i * 2 + 1 + 2000));
 						for (uint16_t i = 498; i > 0; i--) hH[i] = hH[i - 1];
 						hH[0] = (uint16_t) (humidity * 10);
 
@@ -464,7 +458,7 @@ int main(void)
 							AT24XX_Update(i * 2 + 1 + 2000, byteH(hH[i]));
 						}
 
-						for (uint16_t i = 0; i < 499; i++) hP[i] = 0; //byteS(AT24XX_Read(i * 2 + 3000), AT24XX_Read(i * 2 + 1 + 3000));
+						for (uint16_t i = 0; i < 499; i++) hP[i] = byteS(AT24XX_Read(i * 2 + 3000), AT24XX_Read(i * 2 + 1 + 3000));
 						for (uint16_t i = 498; i > 0; i--) hP[i] = hP[i - 1];
 						hP[0] = (uint16_t) (pressure * 10);
 
@@ -827,7 +821,7 @@ static void MX_I2C1_Init(void)
 	hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
 	hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
 	hi2c1.Init.OwnAddress2 = 0;
-	hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_ENABLE;
+	hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
 	hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
 	if (HAL_I2C_Init(&hi2c1) != HAL_OK)
 	{
