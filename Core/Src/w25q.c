@@ -292,7 +292,7 @@ void W25Q_Init(void) {
 
 #if (INIT_DEBUG == 1)
 	char str1[30];
-	sprintf(str1,"ID:0x%X\r\n",id);
+	sprintf(str1,"FLASH ID: 0x%X \r\n",id);
 	HAL_UART_Transmit(&huart1,(uint8_t*)str1, strlen(str1), 0x1000);
 
 	w25_info.high_cap = 0;
@@ -301,46 +301,46 @@ void W25Q_Init(void) {
 	{
 	case 0x401A:
 		w25_info.BlockCount=1024;
-		sprintf(str1,"w25qxx Chip: w25q512\r\n");
+		sprintf(str1,"FLASH CHIP: W25Q512 \r\n");
 		break;
 	case 0x4019:
 		w25_info.BlockCount=512;
-		sprintf(str1,"w25qxx Chip: w25q256\r\n");
+		sprintf(str1,"FLASH CHIP: W25Q256 \r\n");
 		break;
 	case 0x4018:
 		w25_info.BlockCount=256;
-		sprintf(str1,"w25qxx Chip: w25q128\r\n");
+		sprintf(str1,"FLASH CHIP: W25Q128 \r\n");
 		break;
 	case 0x4017:
 		w25_info.BlockCount=128;
-		sprintf(str1,"w25qxx Chip: w25q64\r\n");
+		sprintf(str1,"FLASH CHIP: W25Q64 \r\n");
 		break;
 	case 0x4016:
 		w25_info.BlockCount=64;
-		sprintf(str1,"w25qxx Chip: w25q32\r\n");
+		sprintf(str1,"FLASH CHIP: W25Q32 \r\n");
 		break;
 	case 0x4015:
 		w25_info.BlockCount=32;
-		sprintf(str1,"w25qxx Chip: w25q16\r\n");
+		sprintf(str1,"FLASH CHIP: W25Q16 \r\n");
 		break;
 	case 0x4014:
 		w25_info.BlockCount=16;
-		sprintf(str1,"w25qxx Chip: w25q80\r\n");
+		sprintf(str1,"FLASH CHIP: W25Q80 \r\n");
 		break;
 	case 0x4013:
 		w25_info.BlockCount=8;
-		sprintf(str1,"w25qxx Chip: w25q40\r\n");
+		sprintf(str1,"FLASH CHIP: W25Q40 \r\n");
 		break;
 	case 0x4012:
 		w25_info.BlockCount=4;
-		sprintf(str1,"w25qxx Chip: w25q20\r\n");
+		sprintf(str1,"FLASH CHIP: W25Q20 \r\n");
 		break;
 	case 0x4011:
 		w25_info.BlockCount=2;
-		sprintf(str1,"w25qxx Chip: w25q10\r\n");
+		sprintf(str1,"FLASH CHIP: W25Q10 \r\n");
 		break;
 	default:
-		sprintf(str1,"w25qxx Unknown ID\r\n");
+		sprintf(str1,"FLASH CHIP: UNKNOWN ID \r\n");
 		HAL_UART_Transmit(&huart1,(uint8_t*)str1,strlen(str1),0x1000);
 		break;
 	}
@@ -352,19 +352,19 @@ void W25Q_Init(void) {
 	w25_info.PageCount=(w25_info.SectorCount*w25_info.SectorSize)/w25_info.PageSize;
 	w25_info.BlockSize=w25_info.SectorSize*16;
 	w25_info.NumKB=(w25_info.SectorCount*w25_info.SectorSize)/1024;
-	sprintf(str1,"Page Size: %d Bytes\r\n",(unsigned int)w25_info.PageSize);
+	sprintf(str1,"FLASH PAGE SIZE: %d Bytes \r\n",(unsigned int)w25_info.PageSize);
 	HAL_UART_Transmit(&huart1,(uint8_t*)str1,strlen(str1),0x1000);
-	sprintf(str1,"Page Count: %u\r\n",(unsigned int)w25_info.PageCount);
+	sprintf(str1,"FLASH PAGE COUNT: %u \r\n",(unsigned int)w25_info.PageCount);
 	HAL_UART_Transmit(&huart1,(uint8_t*)str1,strlen(str1),0x1000);
-	sprintf(str1,"Sector Size: %u Bytes\r\n",(unsigned int)w25_info.SectorSize);
+	sprintf(str1,"FLASH SECTOR SIZE: %u Bytes \r\n",(unsigned int)w25_info.SectorSize);
 	HAL_UART_Transmit(&huart1,(uint8_t*)str1,strlen(str1),0x1000);
-	sprintf(str1,"Sector Count: %u\r\n",(unsigned int)w25_info.SectorCount);
+	sprintf(str1,"FLASH SECTOR COUNT: %u \r\n",(unsigned int)w25_info.SectorCount);
 	HAL_UART_Transmit(&huart1,(uint8_t*)str1,strlen(str1),0x1000);
-	sprintf(str1,"Block Size: %u Bytes\r\n",(unsigned int)w25_info.BlockSize);
+	sprintf(str1,"FLASH BLOCK SIZE: %u Bytes \r\n",(unsigned int)w25_info.BlockSize);
 	HAL_UART_Transmit(&huart1,(uint8_t*)str1,strlen(str1),0x1000);
-	sprintf(str1,"Block Count: %u\r\n",(unsigned int)w25_info.BlockCount);
+	sprintf(str1,"FLASH BLOCK COUNT: %u \r\n",(unsigned int)w25_info.BlockCount);
 	HAL_UART_Transmit(&huart1,(uint8_t*)str1,strlen(str1),0x1000);
-	sprintf(str1,"Capacity: %u KB\r\n",(unsigned int)w25_info.NumKB);
+	sprintf(str1,"FLASH CAPACITY: %u KB \r\n",(unsigned int)w25_info.NumKB);
 	HAL_UART_Transmit(&huart1,(uint8_t*)str1,strlen(str1),0x1000);
 #endif
 }

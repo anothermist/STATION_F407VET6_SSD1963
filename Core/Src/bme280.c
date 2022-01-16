@@ -26,8 +26,8 @@ float BME280_getTemperature(int8_t n) {
     uint8_t cmd[4];
 
     cmd[0] = 0xFA; // temp_msb
-    HAL_I2C_Master_Transmit(&BME280_I2C, BME280_ADDR, cmd, 1, BME280_I2C_TIMEOUT);
-    HAL_I2C_Master_Receive(&BME280_I2C, BME280_ADDR, &cmd[1], 3, BME280_I2C_TIMEOUT);
+    HAL_I2C_Master_Transmit(&BME280_I2C, BME280_ADDR, cmd, 1, HAL_MAX_DELAY);
+    HAL_I2C_Master_Receive(&BME280_I2C, BME280_ADDR, &cmd[1], 3, HAL_MAX_DELAY);
 
     temp_raw = (cmd[1] << 12) | (cmd[2] << 4) | (cmd[3] >> 4);
 
@@ -50,8 +50,8 @@ float BME280_getHumidity(int8_t n) {
     uint8_t cmd[4];
 
     cmd[0] = 0xFD; // hum_msb
-    HAL_I2C_Master_Transmit(&BME280_I2C, BME280_ADDR, cmd, 1, BME280_I2C_TIMEOUT);
-    HAL_I2C_Master_Receive(&BME280_I2C, BME280_ADDR, &cmd[1], 2, BME280_I2C_TIMEOUT);
+    HAL_I2C_Master_Transmit(&BME280_I2C, BME280_ADDR, cmd, 1, HAL_MAX_DELAY);
+    HAL_I2C_Master_Receive(&BME280_I2C, BME280_ADDR, &cmd[1], 2, HAL_MAX_DELAY);
 
     hum_raw = (cmd[1] << 8) | cmd[2];
 
@@ -77,8 +77,8 @@ float BME280_getPressure(void) {
     uint8_t cmd[4];
 
     cmd[0] = 0xF7; // press_msb
-    HAL_I2C_Master_Transmit(&BME280_I2C, BME280_ADDR, cmd, 1, BME280_I2C_TIMEOUT);
-    HAL_I2C_Master_Receive(&BME280_I2C, BME280_ADDR, &cmd[1], 3, BME280_I2C_TIMEOUT);
+    HAL_I2C_Master_Transmit(&BME280_I2C, BME280_ADDR, cmd, 1, HAL_MAX_DELAY);
+    HAL_I2C_Master_Receive(&BME280_I2C, BME280_ADDR, &cmd[1], 3, HAL_MAX_DELAY);
 
     press_raw = (cmd[1] << 12) | (cmd[2] << 4) | (cmd[3] >> 4);
 
@@ -113,27 +113,27 @@ void BME280_Init(void) {
 
     cmd[0] = 0xF2; // ctrl_hum
     cmd[1] = 0x05; // Humidity oversampling x16
-    HAL_I2C_Master_Transmit(&BME280_I2C, BME280_ADDR, cmd, 2, BME280_I2C_TIMEOUT);
+    HAL_I2C_Master_Transmit(&BME280_I2C, BME280_ADDR, cmd, 2, HAL_MAX_DELAY);
 
     cmd[0] = 0xF4; // ctrl_meas
     cmd[1] = 0xB7; // Temparature oversampling x16, Pressure oversampling x16, Normal mode
-    HAL_I2C_Master_Transmit(&BME280_I2C, BME280_ADDR, cmd, 2, BME280_I2C_TIMEOUT);
+    HAL_I2C_Master_Transmit(&BME280_I2C, BME280_ADDR, cmd, 2, HAL_MAX_DELAY);
 
     cmd[0] = 0xF5; // config
-    cmd[1] = 0xa0; // Standby BME280_I2C_TIMEOUTms, Filter off
-    HAL_I2C_Master_Transmit(&BME280_I2C, BME280_ADDR, cmd, 2, BME280_I2C_TIMEOUT);
+    cmd[1] = 0xa0; // Standby HAL_MAX_DELAYms, Filter off
+    HAL_I2C_Master_Transmit(&BME280_I2C, BME280_ADDR, cmd, 2, HAL_MAX_DELAY);
 
     cmd[0] = 0x88; // read dig_T regs
-    HAL_I2C_Master_Transmit(&BME280_I2C, BME280_ADDR, cmd, 1, BME280_I2C_TIMEOUT);
-    HAL_I2C_Master_Receive(&BME280_I2C, BME280_ADDR, cmd, 6, BME280_I2C_TIMEOUT);
+    HAL_I2C_Master_Transmit(&BME280_I2C, BME280_ADDR, cmd, 1, HAL_MAX_DELAY);
+    HAL_I2C_Master_Receive(&BME280_I2C, BME280_ADDR, cmd, 6, HAL_MAX_DELAY);
 
     dig_T1 = (cmd[1] << 8) | cmd[0];
     dig_T2 = (cmd[3] << 8) | cmd[2];
     dig_T3 = (cmd[5] << 8) | cmd[4];
 
     cmd[0] = 0x8E; // read dig_P regs
-    HAL_I2C_Master_Transmit(&BME280_I2C, BME280_ADDR, cmd, 1, BME280_I2C_TIMEOUT);
-    HAL_I2C_Master_Receive(&BME280_I2C, BME280_ADDR, cmd, 18, BME280_I2C_TIMEOUT);
+    HAL_I2C_Master_Transmit(&BME280_I2C, BME280_ADDR, cmd, 1, HAL_MAX_DELAY);
+    HAL_I2C_Master_Receive(&BME280_I2C, BME280_ADDR, cmd, 18, HAL_MAX_DELAY);
 
     dig_P1 = (cmd[1] << 8) | cmd[0];
     dig_P2 = (cmd[3] << 8) | cmd[2];
@@ -146,13 +146,13 @@ void BME280_Init(void) {
     dig_P9 = (cmd[17] << 8) | cmd[16];
 
     cmd[0] = 0xA1; // read dig_H regs
-    HAL_I2C_Master_Transmit(&BME280_I2C, BME280_ADDR, cmd, 1, BME280_I2C_TIMEOUT);
-    HAL_I2C_Master_Receive(&BME280_I2C, BME280_ADDR, cmd, 1, BME280_I2C_TIMEOUT);
+    HAL_I2C_Master_Transmit(&BME280_I2C, BME280_ADDR, cmd, 1, HAL_MAX_DELAY);
+    HAL_I2C_Master_Receive(&BME280_I2C, BME280_ADDR, cmd, 1, HAL_MAX_DELAY);
 
     cmd[1] = 0xE1; // read dig_H regs
 
-    HAL_I2C_Master_Transmit(&BME280_I2C, BME280_ADDR, &cmd[1], 1, BME280_I2C_TIMEOUT);
-    HAL_I2C_Master_Receive(&BME280_I2C, BME280_ADDR, &cmd[1], 7, BME280_I2C_TIMEOUT);
+    HAL_I2C_Master_Transmit(&BME280_I2C, BME280_ADDR, &cmd[1], 1, HAL_MAX_DELAY);
+    HAL_I2C_Master_Receive(&BME280_I2C, BME280_ADDR, &cmd[1], 7, HAL_MAX_DELAY);
 
     dig_H1 = cmd[0];
     dig_H2 = (cmd[2] << 8) | cmd[1];
