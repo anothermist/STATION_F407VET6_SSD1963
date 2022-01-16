@@ -29,23 +29,23 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   ALLOC
  12 .ARM.attributes 00000030  00000000  00000000  00040234  2**0
                   CONTENTS, READONLY
- 13 .debug_info   00014eb1  00000000  00000000  00040264  2**0
+ 13 .debug_info   00014cb9  00000000  00000000  00040264  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 14 .debug_abbrev 00002d6d  00000000  00000000  00055115  2**0
+ 14 .debug_abbrev 00002d4d  00000000  00000000  00054f1d  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 15 .debug_aranges 000011b0  00000000  00000000  00057e88  2**3
+ 15 .debug_aranges 00001198  00000000  00000000  00057c70  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 16 .debug_ranges 000010a0  00000000  00000000  00059038  2**3
+ 16 .debug_ranges 00001088  00000000  00000000  00058e08  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_macro  00023ee0  00000000  00000000  0005a0d8  2**0
+ 17 .debug_macro  00023ee0  00000000  00000000  00059e90  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_line   00015fcb  00000000  00000000  0007dfb8  2**0
+ 18 .debug_line   00015f04  00000000  00000000  0007dd70  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .debug_str    000ceb5d  00000000  00000000  00093f83  2**0
+ 19 .debug_str    000ceb04  00000000  00000000  00093c74  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 20 .comment      00000050  00000000  00000000  00162ae0  2**0
+ 20 .comment      00000050  00000000  00000000  00162778  2**0
                   CONTENTS, READONLY
- 21 .debug_frame  000062cc  00000000  00000000  00162b30  2**2
+ 21 .debug_frame  0000625c  00000000  00000000  001627c8  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -9064,8 +9064,8 @@ void HAL_I2C_MspInit(I2C_HandleTypeDef* hi2c)
     GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
  8004c1e:	2312      	movs	r3, #18
  8004c20:	61bb      	str	r3, [r7, #24]
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
- 8004c22:	2300      	movs	r3, #0
+    GPIO_InitStruct.Pull = GPIO_PULLUP;
+ 8004c22:	2301      	movs	r3, #1
  8004c24:	61fb      	str	r3, [r7, #28]
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
  8004c26:	2303      	movs	r3, #3
