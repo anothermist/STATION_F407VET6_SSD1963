@@ -500,32 +500,33 @@ int main(void)
 
 					if (!viewGraphs) {
 
-						for (uint16_t i = 0; i < 155 ; i++) {
+						for (uint16_t i = 0; i < 263 ; i++) {
 							valMap = map(((int16_t)hT[i]), MIN_TEMPERATURE_X10, MAX_TEMPERATURE_X10, 0, 128);
 							if (valMap < 0) valMap = 0;
 							if (valMap > 127) valMap = 127;
-							LCD_Line(3 + (154-i), 191, 3 + (154-i), 317, 1, BLACK);
-							if (valMap) LCD_Line(3 + (154-i), 191 + (127 - valMap), 3 + (154-i), 317,
+							LCD_Line(2 + (262 - i), 222, 2 + (262 - i), 477, 1, BLACK);
+							if (valMap) LCD_Line(3 + (154 - i), 191 + (127 - valMap), 3 + (154 - i), 317,
 									1, RGB(255 - ((127 - valMap) * 2), 0, 255 - (255 - ((127 - valMap) * 2))));
 						}
 
-						for (uint16_t i = 0; i < 155 ; i++) {
+						for (uint16_t i = 0; i < 263 ; i++) {
 							valMap = map(((int16_t)hH[i]), MIN_HUMIDITY_X10, MAX_HUMIDITY_X10, 0, 128);
 							if (valMap < 0) valMap = 0;
 							if (valMap > 127) valMap = 127;
-							LCD_Line(162 + (154-i), 191, 162 + (154-i), 317, 1, BLACK);
-							if (valMap) LCD_Line(162 + (154-i), 191 + (127 - valMap), 162 + (154-i), 317,
+							LCD_Line(268 + (262 - i), 222, 268 + (262 - i), 477, 1, BLACK);
+							if (valMap) LCD_Line(162 + (154 - i), 191 + (127 - valMap), 162 + (154 - i), 317,
 									1, RGB(255 - ((127 - valMap) * 2), 0, 255 - (255 - ((127 - valMap) * 2))));
 						}
 
-						for (uint16_t i = 0; i < 155 ; i++) {
+						for (uint16_t i = 0; i < 263 ; i++) {
 							valMap = map(((int16_t)hP[i]), MIN_PRESSURE, MAX_PRESSURE, 0, 128);
 							if (valMap < 0) valMap = 0;
 							if (valMap > 127) valMap = 127;
-							LCD_Line(321 + (154-i), 191, 321 + (154-i), 317, 1, BLACK);
-							if (valMap) LCD_Line(321 + (154-i), 191 + (127 - valMap), 321 + (154-i), 317,
+							LCD_Line(534 + (262 - i), 222, 534 + (262 - i), 477, 1, BLACK);
+							if (valMap) LCD_Line(321 + (154 - i), 191 + (127 - valMap), 321 + (154 - i), 317,
 									1, RGB(255 - ((127 - valMap) * 2), 0, 255 - (255 - ((127 - valMap) * 2))));
 						}
+
 						for (uint32_t i = 0; i <= 65536; i++) TIM1->CCR1 = i;
 						viewGraphs = 1;
 					}
