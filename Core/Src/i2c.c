@@ -6,7 +6,7 @@ extern I2C_HandleTypeDef I2C;
 extern UART_HandleTypeDef &DEBUG_UART_I2C;
 #endif
 
-void I2C_Scan(I2C_HandleTypeDef *hi2c) {
+void I2C_Scan_Bus(I2C_HandleTypeDef *hi2c) {
     char info[] = "SCANNING I2C BUS... \r\n";
     HAL_UART_Transmit(&DEBUG_UART_I2C, (uint8_t*)info, strlen(info), 1000);
 

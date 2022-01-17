@@ -16,106 +16,90 @@ void DS3231_Update(void) {
     uint8_t cmd = 0;
     HAL_I2C_Master_Transmit(&DS3231_I2C, DS3231_ADDRESS, &cmd, 1, HAL_MAX_DELAY);
     HAL_I2C_Master_Receive(&DS3231_I2C, DS3231_ADDRESS, rtcBuffer, 19, HAL_MAX_DELAY);
-    rtcBufferSet[1] = rtcBuffer[0];
-    rtcBufferSet[2] = rtcBuffer[1];
-    rtcBufferSet[3] = rtcBuffer[2];
-    rtcBufferSet[4] = rtcBuffer[3];
-    rtcBufferSet[5] = rtcBuffer[4];
-    rtcBufferSet[6] = rtcBuffer[5];
-    rtcBufferSet[7] = rtcBuffer[6];
-    rtcBufferSet[8] = rtcBuffer[7];
-    rtcBufferSet[9] = rtcBuffer[8];
-    rtcBufferSet[10] = rtcBuffer[9];
-    rtcBufferSet[11] = rtcBuffer[10];
-    rtcBufferSet[12] = rtcBuffer[11];
-    rtcBufferSet[13] = rtcBuffer[12];
-    rtcBufferSet[14] = rtcBuffer[13];
-    rtcBufferSet[15] = rtcBuffer[14];
-    rtcBufferSet[16] = rtcBuffer[15];
 }
 
 uint8_t DS3231_getSec(void) {
-	DS3231_Update();
+//	DS3231_Update();
     return bcdToDec(rtcBuffer[0]);
 }
 
 uint8_t DS3231_getMin(void) {
-	DS3231_Update();
+//	DS3231_Update();
     return bcdToDec(rtcBuffer[1]);
 }
 
 uint8_t DS3231_getHrs(void) {
-	DS3231_Update();
+//	DS3231_Update();
     return bcdToDec(rtcBuffer[2]);
 }
 
 uint8_t DS3231_getDay(void) {
-	DS3231_Update();
+//	DS3231_Update();
     return bcdToDec(rtcBuffer[3]);
 }
 
 uint8_t DS3231_getDate(void) {
-	DS3231_Update();
+//	DS3231_Update();
     return bcdToDec(rtcBuffer[4]);
 }
 
 uint8_t DS3231_getMonth(void) {
-	DS3231_Update();
+//	DS3231_Update();
     return bcdToDec(rtcBuffer[5]);
 }
 
 uint8_t DS3231_getYear(void) {
-	DS3231_Update();
+//	DS3231_Update();
     return bcdToDec(rtcBuffer[6]);
 }
 
 uint8_t DS3231_getAlarm1Sec(void) {
-	DS3231_Update();
+//	DS3231_Update();
     return bcdToDec(rtcBuffer[7]);
 }
 
 uint8_t DS3231_getAlarm1Min(void) {
-	DS3231_Update();
+//	DS3231_Update();
     return bcdToDec(rtcBuffer[8]);
 }
 
 uint8_t DS3231_getAlarm1Hour(void) {
-	DS3231_Update();
+//	DS3231_Update();
     return bcdToDec(rtcBuffer[9]);
 }
 
 uint8_t DS3231_getAlarm1Day(void) {
-	DS3231_Update();
+//	DS3231_Update();
     return bcdToDec(rtcBuffer[10]);
 }
 
 uint8_t DS3231_getAlarm1Date(void) {
-	DS3231_Update();
+//	DS3231_Update();
     return bcdToDec(rtcBuffer[11]);
 }
 
 uint8_t DS3231_getAlarm2Min(void) {
-	DS3231_Update();
+//	DS3231_Update();
     return bcdToDec(rtcBuffer[12]);
 }
 
 uint8_t DS3231_getAlarm2Hour(void) {
-	DS3231_Update();
+//	DS3231_Update();
     return bcdToDec(rtcBuffer[13]);
 }
 
 uint8_t DS3231_getAlarm2Day(void) {
-	DS3231_Update();
+//	DS3231_Update();
     return bcdToDec(rtcBuffer[14]);
 }
 
 uint8_t DS3231_getAlarm2Date(void) {
-	DS3231_Update();
+//	DS3231_Update();
     return bcdToDec(rtcBuffer[15]);
 }
 
 double DS3231_getTemp(void) {
-	DS3231_Update();
+//	DS3231_Update();
     uint8_t tempMSB = rtcBuffer[17];
     uint8_t tempLSB = rtcBuffer[18];
     double t = 0.0;
@@ -129,96 +113,112 @@ double DS3231_getTemp(void) {
 
 void DS3231_setSec(uint8_t value) {
     DS3231_Update();
+    for (uint8_t i = 0; i < 16; i++) rtcBufferSet[i+1] = rtcBufferSet[i];
     rtcBufferSet[1] = decToBcd(value);
     HAL_I2C_Master_Transmit(&DS3231_I2C, DS3231_ADDRESS, rtcBufferSet, 17, HAL_MAX_DELAY);
 }
 
 void DS3231_setMin(uint8_t value) {
     DS3231_Update();
+    for (uint8_t i = 0; i < 16; i++) rtcBufferSet[i+1] = rtcBufferSet[i];
     rtcBufferSet[2] = decToBcd(value);
     HAL_I2C_Master_Transmit(&DS3231_I2C, DS3231_ADDRESS, rtcBufferSet, 17, HAL_MAX_DELAY);
 }
 
 void DS3231_setHrs(uint8_t value) {
     DS3231_Update();
+    for (uint8_t i = 0; i < 16; i++) rtcBufferSet[i+1] = rtcBufferSet[i];
     rtcBufferSet[3] = decToBcd(value);
     HAL_I2C_Master_Transmit(&DS3231_I2C, DS3231_ADDRESS, rtcBufferSet, 17, HAL_MAX_DELAY);
 }
 
 void DS3231_setDay(uint8_t value) {
     DS3231_Update();
+    for (uint8_t i = 0; i < 16; i++) rtcBufferSet[i+1] = rtcBufferSet[i];
     rtcBufferSet[4] = decToBcd(value);
     HAL_I2C_Master_Transmit(&DS3231_I2C, DS3231_ADDRESS, rtcBufferSet, 17, HAL_MAX_DELAY);
 }
 
 void DS3231_setDate(uint8_t value) {
     DS3231_Update();
+    for (uint8_t i = 0; i < 16; i++) rtcBufferSet[i+1] = rtcBufferSet[i];
     rtcBufferSet[5] = decToBcd(value);
     HAL_I2C_Master_Transmit(&DS3231_I2C, DS3231_ADDRESS, rtcBufferSet, 17, HAL_MAX_DELAY);
 }
 
 void DS3231_setMonth(uint8_t value) {
     DS3231_Update();
+    for (uint8_t i = 0; i < 16; i++) rtcBufferSet[i+1] = rtcBufferSet[i];
     rtcBufferSet[6] = decToBcd(value);
     HAL_I2C_Master_Transmit(&DS3231_I2C, DS3231_ADDRESS, rtcBufferSet, 17, HAL_MAX_DELAY);
 }
 
 void DS3231_setYear(uint8_t value) {
     DS3231_Update();
+    for (uint8_t i = 0; i < 16; i++) rtcBufferSet[i+1] = rtcBufferSet[i];
     rtcBufferSet[7] = decToBcd(value);
     HAL_I2C_Master_Transmit(&DS3231_I2C, DS3231_ADDRESS, rtcBufferSet, 17, HAL_MAX_DELAY);
 }
 
 void DS3231_setAlarm1Sec(uint8_t value) {
     DS3231_Update();
+    for (uint8_t i = 0; i < 16; i++) rtcBufferSet[i+1] = rtcBufferSet[i];
     rtcBufferSet[8] = decToBcd(value);
     HAL_I2C_Master_Transmit(&DS3231_I2C, DS3231_ADDRESS, rtcBufferSet, 17, HAL_MAX_DELAY);
 }
 
 void DS3231_setAlarm1Min(uint8_t value) {
     DS3231_Update();
+    for (uint8_t i = 0; i < 16; i++) rtcBufferSet[i+1] = rtcBufferSet[i];
     rtcBufferSet[9] = decToBcd(value);
     HAL_I2C_Master_Transmit(&DS3231_I2C, DS3231_ADDRESS, rtcBufferSet, 17, HAL_MAX_DELAY);
 }
 
 void DS3231_setAlarm1Hour(uint8_t value) {
     DS3231_Update();
+    for (uint8_t i = 0; i < 16; i++) rtcBufferSet[i+1] = rtcBufferSet[i];
     rtcBufferSet[10] = decToBcd(value);
     HAL_I2C_Master_Transmit(&DS3231_I2C, DS3231_ADDRESS, rtcBufferSet, 17, HAL_MAX_DELAY);
 }
 
 void DS3231_setAlarm1Day(uint8_t value) {
     DS3231_Update();
+    for (uint8_t i = 0; i < 16; i++) rtcBufferSet[i+1] = rtcBufferSet[i];
     rtcBufferSet[11] = decToBcd(value);
     HAL_I2C_Master_Transmit(&DS3231_I2C, DS3231_ADDRESS, rtcBufferSet, 17, HAL_MAX_DELAY);
 }
 
 void DS3231_setAlarm1Date(uint8_t value) {
     DS3231_Update();
+    for (uint8_t i = 0; i < 16; i++) rtcBufferSet[i+1] = rtcBufferSet[i];
     rtcBufferSet[12] = decToBcd(value);
     HAL_I2C_Master_Transmit(&DS3231_I2C, DS3231_ADDRESS, rtcBufferSet, 17, HAL_MAX_DELAY);
 }
 
 void DS3231_setAlarm2Min(uint8_t value) {
     DS3231_Update();
+    for (uint8_t i = 0; i < 16; i++) rtcBufferSet[i+1] = rtcBufferSet[i];
     rtcBufferSet[13] = decToBcd(value);
     HAL_I2C_Master_Transmit(&DS3231_I2C, DS3231_ADDRESS, rtcBufferSet, 17, HAL_MAX_DELAY);
 }
 
 void DS3231_setAlarm2Hour(uint8_t value) {
     DS3231_Update();
+    for (uint8_t i = 0; i < 16; i++) rtcBufferSet[i+1] = rtcBufferSet[i];
     rtcBufferSet[14] = decToBcd(value);
     HAL_I2C_Master_Transmit(&DS3231_I2C, DS3231_ADDRESS, rtcBufferSet, 17, HAL_MAX_DELAY);
 }
 
 void DS3231_setAlarm2Day(uint8_t value) {
     DS3231_Update();
+    for (uint8_t i = 0; i < 16; i++) rtcBufferSet[i+1] = rtcBufferSet[i];
     rtcBufferSet[15] = decToBcd(value);
     HAL_I2C_Master_Transmit(&DS3231_I2C, DS3231_ADDRESS, rtcBufferSet, 17, HAL_MAX_DELAY);
 }
 
 void DS3231_setAlarm2Date(uint8_t value) {
     DS3231_Update();
+    for (uint8_t i = 0; i < 16; i++) rtcBufferSet[i+1] = rtcBufferSet[i];
     rtcBufferSet[16] = decToBcd(value);
     HAL_I2C_Master_Transmit(&DS3231_I2C, DS3231_ADDRESS, rtcBufferSet, 17, HAL_MAX_DELAY);
 }

@@ -17,7 +17,7 @@ extern UART_HandleTypeDef 	huart1;
 #define DEBUG_UART_I2C 		huart1
 #define INIT_DEBUG_I2C 		1
 
-void I2C_Scan(I2C_HandleTypeDef *hi2c);
+void I2C_Scan_Bus(I2C_HandleTypeDef *hi2c);
 void I2C_Error(char *er, uint32_t status);
 void I2C_Clear(I2C_HandleTypeDef *hi2c);
 
