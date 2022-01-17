@@ -26,7 +26,7 @@
 #include "string.h"
 #include "ssd1963.h"
 #include "xpt2046.h"
-#include "i2c_er.h"
+#include "i2c.h"
 #include "bme280.h"
 #include "ds3231.h"
 #include "at24.h"
@@ -65,8 +65,8 @@
 #define MIN_HUMIDITY_X10 100
 #define MAX_HUMIDITY_X10 868
 
-#define MIN_PRESSURE_X10 9370
-#define MAX_PRESSURE_X10 10650
+#define MIN_PRESSURE_X10 9300
+#define MAX_PRESSURE_X10 10580
 
 #define UART_RX_BUFFER_SIZE 16
 #define UART_TX_BUFFER_SIZE 10000
@@ -131,18 +131,6 @@ static void MX_I2C1_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-void I2C_Scan(I2C_HandleTypeDef *hi2c) {
-	char info[] = "SCANNING I2C BUS... \r\n";
-	HAL_UART_Transmit(&huart1, (uint8_t*)info, strlen(info), 1000);
-
-	for(uint16_t i = 0; i < 128; i++) {
-		if(HAL_I2C_IsDeviceReady(hi2c, i << 1, 1, 100) == HAL_OK) {
-			char msg[64] = {0,};
-			snprintf(msg, 64, "I2C DEVICE: 0x%02X \r\n", i);
-			HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), 1000);
-		}
-	}
-}
 
 //void delay_us (uint16_t us)
 //{
@@ -164,52 +152,52 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 /* USER CODE END 0 */
 
 /**
- * @brief  The application entry point.
- * @retval int
- */
+  * @brief  The application entry point.
+  * @retval int
+  */
 int main(void)
 {
-	/* USER CODE BEGIN 1 */
+  /* USER CODE BEGIN 1 */
 
-	/* USER CODE END 1 */
+  /* USER CODE END 1 */
 
-	/* MCU Configuration--------------------------------------------------------*/
+  /* MCU Configuration--------------------------------------------------------*/
 
-	/* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-	HAL_Init();
+  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+  HAL_Init();
 
-	/* USER CODE BEGIN Init */
+  /* USER CODE BEGIN Init */
 
-	/* USER CODE END Init */
+  /* USER CODE END Init */
 
-	/* Configure the system clock */
-	SystemClock_Config();
+  /* Configure the system clock */
+  SystemClock_Config();
 
-	/* USER CODE BEGIN SysInit */
-//	__HAL_RCC_I2C1_CLK_ENABLE();
-//	HAL_Delay(100);
-//	__HAL_RCC_I2C1_FORCE_RESET();
-//	HAL_Delay(100);
-//	__HAL_RCC_I2C1_RELEASE_RESET();
-//	HAL_Delay(100);
-	/* USER CODE END SysInit */
+  /* USER CODE BEGIN SysInit */
+	//	__HAL_RCC_I2C1_CLK_ENABLE();
+	//	HAL_Delay(100);
+	//	__HAL_RCC_I2C1_FORCE_RESET();
+	//	HAL_Delay(100);
+	//	__HAL_RCC_I2C1_RELEASE_RESET();
+	//	HAL_Delay(100);
+  /* USER CODE END SysInit */
 
-	/* Initialize all configured peripherals */
-	MX_GPIO_Init();
-	MX_FSMC_Init();
-	MX_USART1_UART_Init();
-	MX_SPI3_Init();
-	MX_SPI2_Init();
-	MX_DAC_Init();
-	MX_SPI1_Init();
-	MX_I2C1_Init();
-	/* USER CODE BEGIN 2 */
+  /* Initialize all configured peripherals */
+  MX_GPIO_Init();
+  MX_FSMC_Init();
+  MX_USART1_UART_Init();
+  MX_SPI3_Init();
+  MX_SPI2_Init();
+  MX_DAC_Init();
+  MX_SPI1_Init();
+  MX_I2C1_Init();
+  /* USER CODE BEGIN 2 */
 	uint8_t uartTransmit[] = "DEBUG UART OK\r\n";
 	HAL_UART_Transmit(&huart1, uartTransmit, sizeof(uartTransmit), 100);
 
-	I2C_ClearBusyFlagErratum(&hi2c1, 1000);
-
+	I2C_Clear(&hi2c1);
 	I2C_Scan(&hi2c1);
+
 	BME280_Init();
 	W25Q_Init();
 
@@ -258,12 +246,12 @@ int main(void)
 	//		DS3231_setDay(6);
 
 
-	/* USER CODE END 2 */
+  /* USER CODE END 2 */
 
-	/* Infinite loop */
-	/* USER CODE BEGIN WHILE */
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
 	while (1) {
-		I2C_ClearBusyFlagErratum(&hi2c1, 1000);
+		if (HAL_I2C_Init(&hi2c1) != HAL_OK) I2C_Clear(&hi2c1);
 
 		if (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_5) == GPIO_PIN_SET) {
 
@@ -292,9 +280,9 @@ int main(void)
 			rtcMin = DS3231_getMin();
 
 			sprintf(clockPrint, "%02d", rtcSecLast);
-			LCD_Font(600, 40, clockPrint, &DejaVu_Sans_48, 1, BLACK);
+			LCD_Font(630, 85, clockPrint, &DejaVu_Sans_112, 1, BLACK);
 			sprintf(clockPrint, "%02d", rtcSec);
-			LCD_Font(600, 40, clockPrint, &DejaVu_Sans_48, 1, ORANGE);
+			LCD_Font(630, 85, clockPrint, &DejaVu_Sans_112, 1, ORANGE);
 
 			LCD_Circle(300, 60, 10, 0, 1, ORANGE);
 			LCD_Circle(300, 120, 10, 0, 1, ORANGE);
@@ -315,9 +303,9 @@ int main(void)
 				rtcHrs = DS3231_getHrs();
 
 				sprintf(clockPrint, "%02d", rtcMinLast);
-				LCD_Font(310, 175, clockPrint, &DejaVu_Sans_112, 2, BLACK);
+				LCD_Font(310, 170, clockPrint, &DejaVu_Sans_112, 2, BLACK);
 				sprintf(clockPrint, "%02d", rtcMin);
-				LCD_Font(310, 175, clockPrint, &DejaVu_Sans_112, 2, ORANGE);
+				LCD_Font(310, 170, clockPrint, &DejaVu_Sans_112, 2, ORANGE);
 
 				if (rtcHrsLast != rtcHrs) {
 
@@ -327,15 +315,15 @@ int main(void)
 					rtcYear = DS3231_getYear();
 
 					sprintf(clockPrint, "%02d", rtcHrsLast);
-					LCD_Font(0, 175, clockPrint, &DejaVu_Sans_112, 2, BLACK);
+					LCD_Font(0, 170, clockPrint, &DejaVu_Sans_112, 2, BLACK);
 					sprintf(clockPrint, "%02d", rtcHrs);
-					LCD_Font(0, 175, clockPrint, &DejaVu_Sans_112, 2, ORANGE);
+					LCD_Font(0, 170, clockPrint, &DejaVu_Sans_112, 2, ORANGE);
 
 					if (rtcDayLast != rtcDay) {
 
-						static const char* days[7] = { "MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN" };
-						LCD_Font(695, 125, days[(7 + rtcDay - 2) % 7], &DejaVu_Sans_48, 1, BLACK);
-						LCD_Font(695, 125, days[(7 + rtcDay - 1) % 7], &DejaVu_Sans_48, 1, CYAN);
+						static const char* days[7] = { "MO", "TU", "WE", "TH", "FR", "SA", "SU" };
+						LCD_Font(710, 125, days[(7 + rtcDay - 2) % 7], &DejaVu_Sans_48, 1, BLACK);
+						LCD_Font(710, 125, days[(7 + rtcDay - 1) % 7], &DejaVu_Sans_48, 1, CYAN);
 
 						static const char* months[12] = { "JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC" };
 
@@ -363,32 +351,34 @@ int main(void)
 
 					if (temperature != temperatureLast) {
 
-						char weatherPrintT[8];
+						LCD_Rect(1, 182, 265, 40, 1, BLUE);
+
+						char weatherPrintT[7];
 
 						if (temperatureLast >= 10 || (temperatureLast < 0 && temperatureLast > -10)) {
-							sprintf(weatherPrintT, "%.1f'C", temperatureLast);
-							LCD_Font(1, 220, weatherPrintT, &DejaVu_Sans_48, 1, BLACK);
+							sprintf(weatherPrintT, "%.1f 'C", temperatureLast);
+							LCD_Font(61, 220, weatherPrintT, &DejaVu_Sans_48, 1, BLACK);
 						}
 						else if (temperatureLast < 10 && temperatureLast > 0) {
-							sprintf(weatherPrintT, "%.1f'C", temperatureLast);
-							LCD_Font(27, 220, weatherPrintT, &DejaVu_Sans_48, 1, BLACK);
+							sprintf(weatherPrintT, "%.1f 'C", temperatureLast);
+							LCD_Font(87, 220, weatherPrintT, &DejaVu_Sans_48, 1, BLACK);
 						}
 						else if (temperatureLast <= -10) {
-							sprintf(weatherPrintT, "%2d'C", (int8_t)temperatureLast);
-							LCD_Font(1, 220, weatherPrintT, &DejaVu_Sans_48, 1, BLACK);
+							sprintf(weatherPrintT, "%2d 'C", (int8_t)temperatureLast);
+							LCD_Font(61, 220, weatherPrintT, &DejaVu_Sans_48, 1, BLACK);
 						}
 
 						if (temperature >= 10 || (temperature < 0 && temperature > -10)) {
-							sprintf(weatherPrintT, "%.1f'C", temperature);
-							LCD_Font(1, 220, weatherPrintT, &DejaVu_Sans_48, 1, ORANGE);
+							sprintf(weatherPrintT, "%.1f 'C", temperature);
+							LCD_Font(61, 220, weatherPrintT, &DejaVu_Sans_48, 1, ORANGE);
 						}
 						else if (temperature < 10 && temperature > 0) {
-							sprintf(weatherPrintT, "%.1f'C", temperature);
-							LCD_Font(27, 220, weatherPrintT, &DejaVu_Sans_48, 1, ORANGE);
+							sprintf(weatherPrintT, "%.1f 'C", temperature);
+							LCD_Font(87, 220, weatherPrintT, &DejaVu_Sans_48, 1, ORANGE);
 						}
 						else if (temperature <= -10) {
-							sprintf(weatherPrintT, "%2d'C", (int8_t)temperature);
-							LCD_Font(1, 220, weatherPrintT, &DejaVu_Sans_48, 1, ORANGE);
+							sprintf(weatherPrintT, "%2d 'C", (int8_t)temperature);
+							LCD_Font(61, 220, weatherPrintT, &DejaVu_Sans_48, 1, ORANGE);
 						}
 
 						temperatureLast = temperature;
@@ -396,43 +386,47 @@ int main(void)
 
 					if (humidity != humidityLast) {
 
-						char weatherPrintH[7];
+						LCD_Rect(267, 182, 265, 40, 1, BLUE);
 
-						sprintf(weatherPrintH, "%.1f'H", humidityLast);
+						char weatherPrintH[8];
+
+						sprintf(weatherPrintH, "%.1f H2O", humidityLast);
 						if (humidityLast >= 10)
-							LCD_Font(160, 220, weatherPrintH, &DejaVu_Sans_48, 1, BLACK);
-						else LCD_Font(186, 220, weatherPrintH, &DejaVu_Sans_48, 1, BLACK);
+							LCD_Font(297, 220, weatherPrintH, &DejaVu_Sans_48, 1, BLACK);
+						else LCD_Font(323, 220, weatherPrintH, &DejaVu_Sans_48, 1, BLACK);
 
-						sprintf(weatherPrintH, "%.1f'H", humidity);
+						sprintf(weatherPrintH, "%.1f H2O", humidity);
 						if (humidity >= 10)
-							LCD_Font(160, 220, weatherPrintH, &DejaVu_Sans_48, 1, CYAN);
-						else LCD_Font(186, 220, weatherPrintH, &DejaVu_Sans_48, 1, CYAN);
+							LCD_Font(297, 220, weatherPrintH, &DejaVu_Sans_48, 1, CYAN);
+						else LCD_Font(323, 220, weatherPrintH, &DejaVu_Sans_48, 1, CYAN);
 
 						humidityLast = humidity;
 					}
 
 					if (pressureLast != pressure) {
 
+						LCD_Rect(533, 182, 265, 40, 1, BLUE);
+
 						char weatherPrintP[11];
 
 						if (pressureLast >= 1000) {
-							sprintf(weatherPrintP, "%02dP", pressureLast);
-							LCD_Font(320, 220, weatherPrintP, &DejaVu_Sans_48, 1, BLACK);
+							sprintf(weatherPrintP, "%02d HPa", pressureLast);
+							LCD_Font(573, 220, weatherPrintP, &DejaVu_Sans_48, 1, BLACK);
 						}
 						else {
-							sprintf(weatherPrintP, " %02dP", pressureLast);
-							LCD_Font(320, 220, weatherPrintP, &DejaVu_Sans_48, 1, BLACK);
+							sprintf(weatherPrintP, " %02d HPa", pressureLast);
+							LCD_Font(573, 220, weatherPrintP, &DejaVu_Sans_48, 1, BLACK);
 						}
 
 						pressureLast = pressure;
 
 						if (pressureLast >= 1000) {
-							sprintf(weatherPrintP, "%02dP", pressureLast);
-							LCD_Font(320, 220, weatherPrintP, &DejaVu_Sans_48, 1, GREEN);
+							sprintf(weatherPrintP, "%02d HPa", pressureLast);
+							LCD_Font(573, 220, weatherPrintP, &DejaVu_Sans_48, 1, GREEN);
 						}
 						else {
-							sprintf(weatherPrintP, " %02dP", pressureLast);
-							LCD_Font(320, 220, weatherPrintP, &DejaVu_Sans_48, 1, GREEN);
+							sprintf(weatherPrintP, " %02d HPa", pressureLast);
+							LCD_Font(573, 220, weatherPrintP, &DejaVu_Sans_48, 1, GREEN);
 						}
 					}
 
@@ -705,352 +699,352 @@ int main(void)
 			rtcSecLast = rtcSec;
 		}
 
-		/* USER CODE END WHILE */
+    /* USER CODE END WHILE */
 
-		/* USER CODE BEGIN 3 */
+    /* USER CODE BEGIN 3 */
 	}
-	/* USER CODE END 3 */
+  /* USER CODE END 3 */
 }
 
 /**
- * @brief System Clock Configuration
- * @retval None
- */
+  * @brief System Clock Configuration
+  * @retval None
+  */
 void SystemClock_Config(void)
 {
-	RCC_OscInitTypeDef RCC_OscInitStruct = {0};
-	RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+  RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
-	/** Configure the main internal regulator output voltage
-	 */
-	__HAL_RCC_PWR_CLK_ENABLE();
-	__HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
-	/** Initializes the RCC Oscillators according to the specified parameters
-	 * in the RCC_OscInitTypeDef structure.
-	 */
-	RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
-	RCC_OscInitStruct.HSEState = RCC_HSE_ON;
-	RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-	RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-	RCC_OscInitStruct.PLL.PLLM = 4;
-	RCC_OscInitStruct.PLL.PLLN = 168;
-	RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
-	RCC_OscInitStruct.PLL.PLLQ = 7;
-	if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
-	{
-		Error_Handler();
-	}
-	/** Initializes the CPU, AHB and APB buses clocks
-	 */
-	RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
-			|RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
-	RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
-	RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-	RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
-	RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
+  /** Configure the main internal regulator output voltage
+  */
+  __HAL_RCC_PWR_CLK_ENABLE();
+  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
+  /** Initializes the RCC Oscillators according to the specified parameters
+  * in the RCC_OscInitTypeDef structure.
+  */
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+  RCC_OscInitStruct.PLL.PLLM = 4;
+  RCC_OscInitStruct.PLL.PLLN = 168;
+  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
+  RCC_OscInitStruct.PLL.PLLQ = 7;
+  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /** Initializes the CPU, AHB and APB buses clocks
+  */
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
 
-	if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5) != HAL_OK)
-	{
-		Error_Handler();
-	}
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5) != HAL_OK)
+  {
+    Error_Handler();
+  }
 }
 
 /**
- * @brief DAC Initialization Function
- * @param None
- * @retval None
- */
+  * @brief DAC Initialization Function
+  * @param None
+  * @retval None
+  */
 static void MX_DAC_Init(void)
 {
 
-	/* USER CODE BEGIN DAC_Init 0 */
+  /* USER CODE BEGIN DAC_Init 0 */
 
-	/* USER CODE END DAC_Init 0 */
+  /* USER CODE END DAC_Init 0 */
 
-	DAC_ChannelConfTypeDef sConfig = {0};
+  DAC_ChannelConfTypeDef sConfig = {0};
 
-	/* USER CODE BEGIN DAC_Init 1 */
+  /* USER CODE BEGIN DAC_Init 1 */
 
-	/* USER CODE END DAC_Init 1 */
-	/** DAC Initialization
-	 */
-	hdac.Instance = DAC;
-	if (HAL_DAC_Init(&hdac) != HAL_OK)
-	{
-		Error_Handler();
-	}
-	/** DAC channel OUT1 config
-	 */
-	sConfig.DAC_Trigger = DAC_TRIGGER_NONE;
-	sConfig.DAC_OutputBuffer = DAC_OUTPUTBUFFER_ENABLE;
-	if (HAL_DAC_ConfigChannel(&hdac, &sConfig, DAC_CHANNEL_1) != HAL_OK)
-	{
-		Error_Handler();
-	}
-	/** DAC channel OUT2 config
-	 */
-	if (HAL_DAC_ConfigChannel(&hdac, &sConfig, DAC_CHANNEL_2) != HAL_OK)
-	{
-		Error_Handler();
-	}
-	/* USER CODE BEGIN DAC_Init 2 */
+  /* USER CODE END DAC_Init 1 */
+  /** DAC Initialization
+  */
+  hdac.Instance = DAC;
+  if (HAL_DAC_Init(&hdac) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /** DAC channel OUT1 config
+  */
+  sConfig.DAC_Trigger = DAC_TRIGGER_NONE;
+  sConfig.DAC_OutputBuffer = DAC_OUTPUTBUFFER_ENABLE;
+  if (HAL_DAC_ConfigChannel(&hdac, &sConfig, DAC_CHANNEL_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /** DAC channel OUT2 config
+  */
+  if (HAL_DAC_ConfigChannel(&hdac, &sConfig, DAC_CHANNEL_2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN DAC_Init 2 */
 
-	/* USER CODE END DAC_Init 2 */
+  /* USER CODE END DAC_Init 2 */
 
 }
 
 /**
- * @brief I2C1 Initialization Function
- * @param None
- * @retval None
- */
+  * @brief I2C1 Initialization Function
+  * @param None
+  * @retval None
+  */
 static void MX_I2C1_Init(void)
 {
 
-	/* USER CODE BEGIN I2C1_Init 0 */
+  /* USER CODE BEGIN I2C1_Init 0 */
 
-	/* USER CODE END I2C1_Init 0 */
+  /* USER CODE END I2C1_Init 0 */
 
-	/* USER CODE BEGIN I2C1_Init 1 */
+  /* USER CODE BEGIN I2C1_Init 1 */
 
-	/* USER CODE END I2C1_Init 1 */
-	hi2c1.Instance = I2C1;
-	hi2c1.Init.ClockSpeed = 400000;
-	hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_2;
-	hi2c1.Init.OwnAddress1 = 0;
-	hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
-	hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
-	hi2c1.Init.OwnAddress2 = 0;
-	hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
-	hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
-	if (HAL_I2C_Init(&hi2c1) != HAL_OK)
-	{
-		Error_Handler();
-	}
-	/* USER CODE BEGIN I2C1_Init 2 */
+  /* USER CODE END I2C1_Init 1 */
+  hi2c1.Instance = I2C1;
+  hi2c1.Init.ClockSpeed = 400000;
+  hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_2;
+  hi2c1.Init.OwnAddress1 = 0;
+  hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+  hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+  hi2c1.Init.OwnAddress2 = 0;
+  hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+  hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+  if (HAL_I2C_Init(&hi2c1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN I2C1_Init 2 */
 
-	/* USER CODE END I2C1_Init 2 */
+  /* USER CODE END I2C1_Init 2 */
 
 }
 
 /**
- * @brief SPI1 Initialization Function
- * @param None
- * @retval None
- */
+  * @brief SPI1 Initialization Function
+  * @param None
+  * @retval None
+  */
 static void MX_SPI1_Init(void)
 {
 
-	/* USER CODE BEGIN SPI1_Init 0 */
+  /* USER CODE BEGIN SPI1_Init 0 */
 
-	/* USER CODE END SPI1_Init 0 */
+  /* USER CODE END SPI1_Init 0 */
 
-	/* USER CODE BEGIN SPI1_Init 1 */
+  /* USER CODE BEGIN SPI1_Init 1 */
 
-	/* USER CODE END SPI1_Init 1 */
-	/* SPI1 parameter configuration*/
-	hspi1.Instance = SPI1;
-	hspi1.Init.Mode = SPI_MODE_MASTER;
-	hspi1.Init.Direction = SPI_DIRECTION_2LINES;
-	hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
-	hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
-	hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
-	hspi1.Init.NSS = SPI_NSS_SOFT;
-	hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
-	hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
-	hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
-	hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
-	hspi1.Init.CRCPolynomial = 10;
-	if (HAL_SPI_Init(&hspi1) != HAL_OK)
-	{
-		Error_Handler();
-	}
-	/* USER CODE BEGIN SPI1_Init 2 */
+  /* USER CODE END SPI1_Init 1 */
+  /* SPI1 parameter configuration*/
+  hspi1.Instance = SPI1;
+  hspi1.Init.Mode = SPI_MODE_MASTER;
+  hspi1.Init.Direction = SPI_DIRECTION_2LINES;
+  hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
+  hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
+  hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
+  hspi1.Init.NSS = SPI_NSS_SOFT;
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
+  hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
+  hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
+  hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
+  hspi1.Init.CRCPolynomial = 10;
+  if (HAL_SPI_Init(&hspi1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN SPI1_Init 2 */
 
-	/* USER CODE END SPI1_Init 2 */
+  /* USER CODE END SPI1_Init 2 */
 
 }
 
 /**
- * @brief SPI2 Initialization Function
- * @param None
- * @retval None
- */
+  * @brief SPI2 Initialization Function
+  * @param None
+  * @retval None
+  */
 static void MX_SPI2_Init(void)
 {
 
-	/* USER CODE BEGIN SPI2_Init 0 */
+  /* USER CODE BEGIN SPI2_Init 0 */
 
-	/* USER CODE END SPI2_Init 0 */
+  /* USER CODE END SPI2_Init 0 */
 
-	/* USER CODE BEGIN SPI2_Init 1 */
+  /* USER CODE BEGIN SPI2_Init 1 */
 
-	/* USER CODE END SPI2_Init 1 */
-	/* SPI2 parameter configuration*/
-	hspi2.Instance = SPI2;
-	hspi2.Init.Mode = SPI_MODE_MASTER;
-	hspi2.Init.Direction = SPI_DIRECTION_2LINES;
-	hspi2.Init.DataSize = SPI_DATASIZE_8BIT;
-	hspi2.Init.CLKPolarity = SPI_POLARITY_LOW;
-	hspi2.Init.CLKPhase = SPI_PHASE_1EDGE;
-	hspi2.Init.NSS = SPI_NSS_HARD_OUTPUT;
-	hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_256;
-	hspi2.Init.FirstBit = SPI_FIRSTBIT_MSB;
-	hspi2.Init.TIMode = SPI_TIMODE_DISABLE;
-	hspi2.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
-	hspi2.Init.CRCPolynomial = 10;
-	if (HAL_SPI_Init(&hspi2) != HAL_OK)
-	{
-		Error_Handler();
-	}
-	/* USER CODE BEGIN SPI2_Init 2 */
+  /* USER CODE END SPI2_Init 1 */
+  /* SPI2 parameter configuration*/
+  hspi2.Instance = SPI2;
+  hspi2.Init.Mode = SPI_MODE_MASTER;
+  hspi2.Init.Direction = SPI_DIRECTION_2LINES;
+  hspi2.Init.DataSize = SPI_DATASIZE_8BIT;
+  hspi2.Init.CLKPolarity = SPI_POLARITY_LOW;
+  hspi2.Init.CLKPhase = SPI_PHASE_1EDGE;
+  hspi2.Init.NSS = SPI_NSS_HARD_OUTPUT;
+  hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_256;
+  hspi2.Init.FirstBit = SPI_FIRSTBIT_MSB;
+  hspi2.Init.TIMode = SPI_TIMODE_DISABLE;
+  hspi2.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
+  hspi2.Init.CRCPolynomial = 10;
+  if (HAL_SPI_Init(&hspi2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN SPI2_Init 2 */
 
-	/* USER CODE END SPI2_Init 2 */
+  /* USER CODE END SPI2_Init 2 */
 
 }
 
 /**
- * @brief SPI3 Initialization Function
- * @param None
- * @retval None
- */
+  * @brief SPI3 Initialization Function
+  * @param None
+  * @retval None
+  */
 static void MX_SPI3_Init(void)
 {
 
-	/* USER CODE BEGIN SPI3_Init 0 */
+  /* USER CODE BEGIN SPI3_Init 0 */
 
-	/* USER CODE END SPI3_Init 0 */
+  /* USER CODE END SPI3_Init 0 */
 
-	/* USER CODE BEGIN SPI3_Init 1 */
+  /* USER CODE BEGIN SPI3_Init 1 */
 
-	/* USER CODE END SPI3_Init 1 */
-	/* SPI3 parameter configuration*/
-	hspi3.Instance = SPI3;
-	hspi3.Init.Mode = SPI_MODE_MASTER;
-	hspi3.Init.Direction = SPI_DIRECTION_2LINES;
-	hspi3.Init.DataSize = SPI_DATASIZE_8BIT;
-	hspi3.Init.CLKPolarity = SPI_POLARITY_LOW;
-	hspi3.Init.CLKPhase = SPI_PHASE_1EDGE;
-	hspi3.Init.NSS = SPI_NSS_HARD_OUTPUT;
-	hspi3.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_256;
-	hspi3.Init.FirstBit = SPI_FIRSTBIT_MSB;
-	hspi3.Init.TIMode = SPI_TIMODE_DISABLE;
-	hspi3.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
-	hspi3.Init.CRCPolynomial = 10;
-	if (HAL_SPI_Init(&hspi3) != HAL_OK)
-	{
-		Error_Handler();
-	}
-	/* USER CODE BEGIN SPI3_Init 2 */
+  /* USER CODE END SPI3_Init 1 */
+  /* SPI3 parameter configuration*/
+  hspi3.Instance = SPI3;
+  hspi3.Init.Mode = SPI_MODE_MASTER;
+  hspi3.Init.Direction = SPI_DIRECTION_2LINES;
+  hspi3.Init.DataSize = SPI_DATASIZE_8BIT;
+  hspi3.Init.CLKPolarity = SPI_POLARITY_LOW;
+  hspi3.Init.CLKPhase = SPI_PHASE_1EDGE;
+  hspi3.Init.NSS = SPI_NSS_HARD_OUTPUT;
+  hspi3.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_256;
+  hspi3.Init.FirstBit = SPI_FIRSTBIT_MSB;
+  hspi3.Init.TIMode = SPI_TIMODE_DISABLE;
+  hspi3.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
+  hspi3.Init.CRCPolynomial = 10;
+  if (HAL_SPI_Init(&hspi3) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN SPI3_Init 2 */
 
-	/* USER CODE END SPI3_Init 2 */
+  /* USER CODE END SPI3_Init 2 */
 
 }
 
 /**
- * @brief USART1 Initialization Function
- * @param None
- * @retval None
- */
+  * @brief USART1 Initialization Function
+  * @param None
+  * @retval None
+  */
 static void MX_USART1_UART_Init(void)
 {
 
-	/* USER CODE BEGIN USART1_Init 0 */
+  /* USER CODE BEGIN USART1_Init 0 */
 
-	/* USER CODE END USART1_Init 0 */
+  /* USER CODE END USART1_Init 0 */
 
-	/* USER CODE BEGIN USART1_Init 1 */
+  /* USER CODE BEGIN USART1_Init 1 */
 
-	/* USER CODE END USART1_Init 1 */
-	huart1.Instance = USART1;
-	huart1.Init.BaudRate = 115200;
-	huart1.Init.WordLength = UART_WORDLENGTH_8B;
-	huart1.Init.StopBits = UART_STOPBITS_1;
-	huart1.Init.Parity = UART_PARITY_NONE;
-	huart1.Init.Mode = UART_MODE_TX_RX;
-	huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-	huart1.Init.OverSampling = UART_OVERSAMPLING_16;
-	if (HAL_UART_Init(&huart1) != HAL_OK)
-	{
-		Error_Handler();
-	}
-	/* USER CODE BEGIN USART1_Init 2 */
+  /* USER CODE END USART1_Init 1 */
+  huart1.Instance = USART1;
+  huart1.Init.BaudRate = 115200;
+  huart1.Init.WordLength = UART_WORDLENGTH_8B;
+  huart1.Init.StopBits = UART_STOPBITS_1;
+  huart1.Init.Parity = UART_PARITY_NONE;
+  huart1.Init.Mode = UART_MODE_TX_RX;
+  huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart1.Init.OverSampling = UART_OVERSAMPLING_16;
+  if (HAL_UART_Init(&huart1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN USART1_Init 2 */
 
-	/* USER CODE END USART1_Init 2 */
+  /* USER CODE END USART1_Init 2 */
 
 }
 
 /**
- * @brief GPIO Initialization Function
- * @param None
- * @retval None
- */
+  * @brief GPIO Initialization Function
+  * @param None
+  * @retval None
+  */
 static void MX_GPIO_Init(void)
 {
-	GPIO_InitTypeDef GPIO_InitStruct = {0};
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
 
-	/* GPIO Ports Clock Enable */
-	__HAL_RCC_GPIOE_CLK_ENABLE();
-	__HAL_RCC_GPIOC_CLK_ENABLE();
-	__HAL_RCC_GPIOH_CLK_ENABLE();
-	__HAL_RCC_GPIOA_CLK_ENABLE();
-	__HAL_RCC_GPIOB_CLK_ENABLE();
-	__HAL_RCC_GPIOD_CLK_ENABLE();
+  /* GPIO Ports Clock Enable */
+  __HAL_RCC_GPIOE_CLK_ENABLE();
+  __HAL_RCC_GPIOC_CLK_ENABLE();
+  __HAL_RCC_GPIOH_CLK_ENABLE();
+  __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
+  __HAL_RCC_GPIOD_CLK_ENABLE();
 
-	/*Configure GPIO pin Output Level */
-	HAL_GPIO_WritePin(LED_A_GPIO_Port, LED_A_Pin, GPIO_PIN_SET);
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(LED_A_GPIO_Port, LED_A_Pin, GPIO_PIN_SET);
 
-	/*Configure GPIO pin Output Level */
-	HAL_GPIO_WritePin(LED_B_GPIO_Port, LED_B_Pin, GPIO_PIN_RESET);
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(LED_B_GPIO_Port, LED_B_Pin, GPIO_PIN_RESET);
 
-	/*Configure GPIO pin Output Level */
-	HAL_GPIO_WritePin(FLASH25Q_CS_GPIO_Port, FLASH25Q_CS_Pin, GPIO_PIN_SET);
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(FLASH25Q_CS_GPIO_Port, FLASH25Q_CS_Pin, GPIO_PIN_SET);
 
-	/*Configure GPIO pin Output Level */
-	HAL_GPIO_WritePin(GPIOC, SD_D0_Pin|SD_D1_Pin, GPIO_PIN_RESET);
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOC, SD_D0_Pin|SD_D1_Pin, GPIO_PIN_RESET);
 
-	/*Configure GPIO pin Output Level */
-	HAL_GPIO_WritePin(SD_CMD_GPIO_Port, SD_CMD_Pin, GPIO_PIN_RESET);
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(SD_CMD_GPIO_Port, SD_CMD_Pin, GPIO_PIN_RESET);
 
-	/*Configure GPIO pins : KEY_1_Pin KEY_0_Pin */
-	GPIO_InitStruct.Pin = KEY_1_Pin|KEY_0_Pin;
-	GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-	GPIO_InitStruct.Pull = GPIO_NOPULL;
-	HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
+  /*Configure GPIO pins : KEY_1_Pin KEY_0_Pin */
+  GPIO_InitStruct.Pin = KEY_1_Pin|KEY_0_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
-	/*Configure GPIO pins : LED_A_Pin LED_B_Pin */
-	GPIO_InitStruct.Pin = LED_A_Pin|LED_B_Pin;
-	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-	GPIO_InitStruct.Pull = GPIO_NOPULL;
-	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-	HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+  /*Configure GPIO pins : LED_A_Pin LED_B_Pin */
+  GPIO_InitStruct.Pin = LED_A_Pin|LED_B_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-	/*Configure GPIO pin : TOUCH_IRQ_Pin */
-	GPIO_InitStruct.Pin = TOUCH_IRQ_Pin;
-	GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-	GPIO_InitStruct.Pull = GPIO_PULLUP;
-	HAL_GPIO_Init(TOUCH_IRQ_GPIO_Port, &GPIO_InitStruct);
+  /*Configure GPIO pin : TOUCH_IRQ_Pin */
+  GPIO_InitStruct.Pin = TOUCH_IRQ_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(TOUCH_IRQ_GPIO_Port, &GPIO_InitStruct);
 
-	/*Configure GPIO pin : FLASH25Q_CS_Pin */
-	GPIO_InitStruct.Pin = FLASH25Q_CS_Pin;
-	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-	GPIO_InitStruct.Pull = GPIO_PULLUP;
-	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-	HAL_GPIO_Init(FLASH25Q_CS_GPIO_Port, &GPIO_InitStruct);
+  /*Configure GPIO pin : FLASH25Q_CS_Pin */
+  GPIO_InitStruct.Pin = FLASH25Q_CS_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  HAL_GPIO_Init(FLASH25Q_CS_GPIO_Port, &GPIO_InitStruct);
 
-	/*Configure GPIO pins : SD_D0_Pin SD_D1_Pin */
-	GPIO_InitStruct.Pin = SD_D0_Pin|SD_D1_Pin;
-	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-	GPIO_InitStruct.Pull = GPIO_NOPULL;
-	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-	HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+  /*Configure GPIO pins : SD_D0_Pin SD_D1_Pin */
+  GPIO_InitStruct.Pin = SD_D0_Pin|SD_D1_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-	/*Configure GPIO pin : SD_CMD_Pin */
-	GPIO_InitStruct.Pin = SD_CMD_Pin;
-	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-	GPIO_InitStruct.Pull = GPIO_NOPULL;
-	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-	HAL_GPIO_Init(SD_CMD_GPIO_Port, &GPIO_InitStruct);
+  /*Configure GPIO pin : SD_CMD_Pin */
+  GPIO_InitStruct.Pin = SD_CMD_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(SD_CMD_GPIO_Port, &GPIO_InitStruct);
 
 }
 
@@ -1058,53 +1052,53 @@ static void MX_GPIO_Init(void)
 static void MX_FSMC_Init(void)
 {
 
-	/* USER CODE BEGIN FSMC_Init 0 */
+  /* USER CODE BEGIN FSMC_Init 0 */
 
-	/* USER CODE END FSMC_Init 0 */
+  /* USER CODE END FSMC_Init 0 */
 
-	FSMC_NORSRAM_TimingTypeDef Timing = {0};
+  FSMC_NORSRAM_TimingTypeDef Timing = {0};
 
-	/* USER CODE BEGIN FSMC_Init 1 */
+  /* USER CODE BEGIN FSMC_Init 1 */
 
-	/* USER CODE END FSMC_Init 1 */
+  /* USER CODE END FSMC_Init 1 */
 
-	/** Perform the SRAM1 memory initialization sequence
-	 */
-	hsram1.Instance = FSMC_NORSRAM_DEVICE;
-	hsram1.Extended = FSMC_NORSRAM_EXTENDED_DEVICE;
-	/* hsram1.Init */
-	hsram1.Init.NSBank = FSMC_NORSRAM_BANK1;
-	hsram1.Init.DataAddressMux = FSMC_DATA_ADDRESS_MUX_DISABLE;
-	hsram1.Init.MemoryType = FSMC_MEMORY_TYPE_SRAM;
-	hsram1.Init.MemoryDataWidth = FSMC_NORSRAM_MEM_BUS_WIDTH_16;
-	hsram1.Init.BurstAccessMode = FSMC_BURST_ACCESS_MODE_DISABLE;
-	hsram1.Init.WaitSignalPolarity = FSMC_WAIT_SIGNAL_POLARITY_LOW;
-	hsram1.Init.WrapMode = FSMC_WRAP_MODE_DISABLE;
-	hsram1.Init.WaitSignalActive = FSMC_WAIT_TIMING_BEFORE_WS;
-	hsram1.Init.WriteOperation = FSMC_WRITE_OPERATION_ENABLE;
-	hsram1.Init.WaitSignal = FSMC_WAIT_SIGNAL_DISABLE;
-	hsram1.Init.ExtendedMode = FSMC_EXTENDED_MODE_DISABLE;
-	hsram1.Init.AsynchronousWait = FSMC_ASYNCHRONOUS_WAIT_DISABLE;
-	hsram1.Init.WriteBurst = FSMC_WRITE_BURST_DISABLE;
-	hsram1.Init.PageSize = FSMC_PAGE_SIZE_NONE;
-	/* Timing */
-	Timing.AddressSetupTime = 2;
-	Timing.AddressHoldTime = 15;
-	Timing.DataSetupTime = 5;
-	Timing.BusTurnAroundDuration = 2;
-	Timing.CLKDivision = 16;
-	Timing.DataLatency = 17;
-	Timing.AccessMode = FSMC_ACCESS_MODE_A;
-	/* ExtTiming */
+  /** Perform the SRAM1 memory initialization sequence
+  */
+  hsram1.Instance = FSMC_NORSRAM_DEVICE;
+  hsram1.Extended = FSMC_NORSRAM_EXTENDED_DEVICE;
+  /* hsram1.Init */
+  hsram1.Init.NSBank = FSMC_NORSRAM_BANK1;
+  hsram1.Init.DataAddressMux = FSMC_DATA_ADDRESS_MUX_DISABLE;
+  hsram1.Init.MemoryType = FSMC_MEMORY_TYPE_SRAM;
+  hsram1.Init.MemoryDataWidth = FSMC_NORSRAM_MEM_BUS_WIDTH_16;
+  hsram1.Init.BurstAccessMode = FSMC_BURST_ACCESS_MODE_DISABLE;
+  hsram1.Init.WaitSignalPolarity = FSMC_WAIT_SIGNAL_POLARITY_LOW;
+  hsram1.Init.WrapMode = FSMC_WRAP_MODE_DISABLE;
+  hsram1.Init.WaitSignalActive = FSMC_WAIT_TIMING_BEFORE_WS;
+  hsram1.Init.WriteOperation = FSMC_WRITE_OPERATION_ENABLE;
+  hsram1.Init.WaitSignal = FSMC_WAIT_SIGNAL_DISABLE;
+  hsram1.Init.ExtendedMode = FSMC_EXTENDED_MODE_DISABLE;
+  hsram1.Init.AsynchronousWait = FSMC_ASYNCHRONOUS_WAIT_DISABLE;
+  hsram1.Init.WriteBurst = FSMC_WRITE_BURST_DISABLE;
+  hsram1.Init.PageSize = FSMC_PAGE_SIZE_NONE;
+  /* Timing */
+  Timing.AddressSetupTime = 2;
+  Timing.AddressHoldTime = 15;
+  Timing.DataSetupTime = 5;
+  Timing.BusTurnAroundDuration = 2;
+  Timing.CLKDivision = 16;
+  Timing.DataLatency = 17;
+  Timing.AccessMode = FSMC_ACCESS_MODE_A;
+  /* ExtTiming */
 
-	if (HAL_SRAM_Init(&hsram1, &Timing, NULL) != HAL_OK)
-	{
-		Error_Handler( );
-	}
+  if (HAL_SRAM_Init(&hsram1, &Timing, NULL) != HAL_OK)
+  {
+    Error_Handler( );
+  }
 
-	/* USER CODE BEGIN FSMC_Init 2 */
+  /* USER CODE BEGIN FSMC_Init 2 */
 
-	/* USER CODE END FSMC_Init 2 */
+  /* USER CODE END FSMC_Init 2 */
 }
 
 /* USER CODE BEGIN 4 */
@@ -1115,34 +1109,34 @@ static void MX_FSMC_Init(void)
 /* USER CODE END 4 */
 
 /**
- * @brief  This function is executed in case of error occurrence.
- * @retval None
- */
+  * @brief  This function is executed in case of error occurrence.
+  * @retval None
+  */
 void Error_Handler(void)
 {
-	/* USER CODE BEGIN Error_Handler_Debug */
+  /* USER CODE BEGIN Error_Handler_Debug */
 	/* User can add his own implementation to report the HAL error return state */
 	__disable_irq();
 	while (1)
 	{
 	}
-	/* USER CODE END Error_Handler_Debug */
+  /* USER CODE END Error_Handler_Debug */
 }
 
 #ifdef  USE_FULL_ASSERT
 /**
- * @brief  Reports the name of the source file and the source line number
- *         where the assert_param error has occurred.
- * @param  file: pointer to the source file name
- * @param  line: assert_param error line source number
- * @retval None
- */
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @param  line: assert_param error line source number
+  * @retval None
+  */
 void assert_failed(uint8_t *file, uint32_t line)
 {
-	/* USER CODE BEGIN 6 */
+  /* USER CODE BEGIN 6 */
 	/* User can add his own implementation to report the file name and line number,
      ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-	/* USER CODE END 6 */
+  /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
 
