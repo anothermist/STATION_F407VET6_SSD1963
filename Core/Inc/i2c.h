@@ -19,7 +19,7 @@ extern UART_HandleTypeDef 	huart1;
 
 void I2C_Scan_Bus(I2C_HandleTypeDef *hi2c);
 void I2C_Error(char *er, uint32_t status);
-void I2C_Clear(I2C_HandleTypeDef *hi2c);
+void I2C_Init(I2C_HandleTypeDef *hi2c);
 
 #endif /* I2C_ER_H_ */
 

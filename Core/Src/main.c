@@ -111,13 +111,14 @@ UART_HandleTypeDef huart1;
 SRAM_HandleTypeDef hsram1;
 
 /* USER CODE BEGIN PV */
-//RTC_TimeTypeDef clockTime = {0};
-//RTC_DateTypeDef clockDate = {0};
-//RTC_DateTypeDef DateToUpdate = {0};
+RTC_TimeTypeDef clockTime;
+RTC_DateTypeDef clockDate;
 
+//RTC_DateTypeDef DateToUpdate;
+//DS3231_t DS3231;
 uint8_t viewGraphs;
-uint8_t rtcSec, rtcMin, rtcHrs, rtcDate, rtcMonth, rtcDay, rtcYear;
-uint8_t rtcSecLast = 61, rtcMinLast = 61, rtcHrsLast = 25, rtcDayLast, rtcDateLast, rtcMonthLast, rtcYearLast;
+uint8_t rtcSec, rtcMin, rtcHrs, rtcDate, rtcMonth, rtcWeekD, rtcYear;
+uint8_t rtcSecLast = 61, rtcMinLast = 61, rtcHrsLast = 25, rtcWeekDLast, rtcDateLast, rtcMonthLast, rtcYearLast;
 double temperature, temperatureLast, humidity, humidityLast, temperatureRemote, temperatureRemoteLast, humidityRemote, humidityRemoteLast;
 uint16_t pressure, pressureLast, remoteSensorLastUpdate = WAIT_REMOTE_SENSOR_SEC + 1;
 int16_t hT[500], hH[500], hP[500];
@@ -204,62 +205,81 @@ int main(void)
   MX_IWDG_Init();
   MX_RTC_Init();
   /* USER CODE BEGIN 2 */
-	//	HAL_RTC_Init(&hrtc);
-	uint8_t uartTransmit[] = "\r\n";
-
-	HAL_UART_Transmit(&huart1, uartTransmit, sizeof(uartTransmit), 100);
-	I2C_Clear(&hi2c1);
+	HAL_RTC_Init(&hrtc);
+	uint8_t uart_tx_new[] = "\r\n";
+	HAL_UART_Transmit(&huart1, uart_tx_new, sizeof(uart_tx_new), 100);
+	I2C_Init(&hi2c1);
 	I2C_Scan_Bus(&hi2c1);
-	HAL_UART_Transmit(&huart1, uartTransmit, sizeof(uartTransmit), 100);
+	HAL_UART_Transmit(&huart1, uart_tx_new, sizeof(uart_tx_new), 100);
 	W25Q_Init();
-	HAL_UART_Transmit(&huart1, uartTransmit, sizeof(uartTransmit), 100);
+	HAL_UART_Transmit(&huart1, uart_tx_new, sizeof(uart_tx_new), 100);
 	BME280_Init();
 	LCD_Init();
 	XPT2046_Init();
 
-	//	clockTime.Hours = 14;
-	//	clockTime.Minutes = 04;
-	//	clockTime.Seconds = 10;
-	//	HAL_RTC_SetTime(&hrtc, &clockTime, RTC_FORMAT_BIN);
-	//	clockDate.Date = 17;
-	//	clockDate.Month = RTC_MONTH_JANUARY;
-	//	clockDate.WeekDay = RTC_WEEKDAY_MONDAY;
-	//	clockDate.Year = 22;
-	//	HAL_RTC_SetDate(&hrtc, &clockDate, RTC_FORMAT_BIN);
+	DS3231_Update(); rtcSec = DS3231_getSec(); rtcMin = DS3231_getMin(); rtcHrs = DS3231_getHrs();
+	rtcDate = DS3231_getDate(); rtcMonth = DS3231_getMonth(); rtcYear = DS3231_getYear(); rtcWeekD = DS3231_getWeekDay();
 
-	DS3231_Update();
-	rtcSec = DS3231_getSec();
-	rtcMin = DS3231_getMin();
-	rtcHrs = DS3231_getHrs();
-	rtcDay = DS3231_getDay();
-	rtcDate = DS3231_getDate();
-	rtcMonth = DS3231_getMonth();
-	rtcYear = DS3231_getYear();
+	HAL_RTC_GetTime(&hrtc, &clockTime, RTC_FORMAT_BIN);
+	HAL_RTC_GetDate(&hrtc, &clockDate, RTC_FORMAT_BIN);
 
-	char uart_tx[38];
+	if (!clockDate.Year) {
+	clockTime.Hours = rtcHrs;
+	clockTime.Minutes = rtcMin;
+	clockTime.Seconds = rtcSec +1;
+	HAL_RTC_SetTime(&hrtc, &clockTime, RTC_FORMAT_BIN);
+	clockDate.Date = rtcDate;
+	clockDate.Month = rtcMonth;
+	clockDate.Year = rtcYear;
+	clockDate.WeekDay = rtcWeekD;
+	HAL_RTC_SetDate(&hrtc, &clockDate, RTC_FORMAT_BIN);
+	}
 
-	//    HAL_RTC_GetTime(&hrtc, &clockTime, RTC_FORMAT_BIN); // RTC_FORMAT_BIN , RTC_FORMAT_BCD
-	//    snprintf(uart_tx, 63, "Time: %02d:%02d:%02d \r\n", clockTime.Hours, clockTime.Minutes, clockTime.Seconds);
-	snprintf(uart_tx, 38, "Time: %02d:%02d:%02d ", rtcHrs, rtcMin, rtcSec);
+	char uart_tx[45];
+	static const char* weekdays[7] = { "MO", "TU", "WE", "TH", "FR", "SA", "SU" };
+	HAL_RTC_GetTime(&hrtc, &clockTime, RTC_FORMAT_BIN);
+	snprintf(uart_tx, 45, "INTRTC Time: %02d:%02d:%02d ", clockTime.Hours, clockTime.Minutes, clockTime.Seconds);
+	HAL_RTC_GetDate(&hrtc, &clockDate, RTC_FORMAT_BIN);
 	HAL_UART_Transmit(&huart1, (uint8_t*)uart_tx, strlen(uart_tx), 100);
-	//
-	//    HAL_RTC_GetDate(&hrtc, &DateToUpdate, RTC_FORMAT_BIN);
-	//    snprintf(uart_tx, 63, "Date: %02d.%02d.20%02d \r\n", DateToUpdate.Date, DateToUpdate.Month, DateToUpdate.Year);
-	snprintf(uart_tx, 38, "Date: %02d.%02d.20%02d \r\n", rtcDate, rtcMonth, rtcYear);
+	snprintf(uart_tx, 45, "Date: %02d.%02d.20%02d ", clockDate.Date, clockDate.Month, clockDate.Year);
+	HAL_UART_Transmit(&huart1, (uint8_t*)uart_tx, strlen(uart_tx), 100);
+	snprintf(uart_tx, 45, "%s \r\n", weekdays[(7 + clockDate.WeekDay - 1) % 7]);
+	HAL_UART_Transmit(&huart1, (uint8_t*)uart_tx, strlen(uart_tx), 100);
+
+	if (!rtcYear) {
+	DS3231_Update();
+	DS3231_setHrs(clockTime.Hours);
+	DS3231_setMin(clockTime.Minutes);
+	DS3231_setSec(clockTime.Seconds);
+	DS3231_setDate(clockDate.Date);
+	DS3231_setMonth(clockDate.Month);
+	DS3231_setYear(clockDate.Year);
+	DS3231_setWeekDay(clockDate.WeekDay);
+	}
+
+	DS3231_Update(); rtcSec = DS3231_getSec(); rtcMin = DS3231_getMin(); rtcHrs = DS3231_getHrs();
+	rtcDate = DS3231_getDate(); rtcMonth = DS3231_getMonth(); rtcYear = DS3231_getYear(); rtcWeekD = DS3231_getWeekDay();
+
+	snprintf(uart_tx, 45, "DS3231 Time: %02d:%02d:%02d ", rtcHrs, rtcMin, rtcSec);
+	HAL_UART_Transmit(&huart1, (uint8_t*)uart_tx, strlen(uart_tx), 100);
+	snprintf(uart_tx, 45, "Date: %02d.%02d.20%02d ", rtcDate, rtcMonth, rtcYear);
+	HAL_UART_Transmit(&huart1, (uint8_t*)uart_tx, strlen(uart_tx), 100);
+	snprintf(uart_tx, 45, "%s \r\n", weekdays[(7 + rtcWeekD - 1) % 7]);
 	HAL_UART_Transmit(&huart1, (uint8_t*)uart_tx, strlen(uart_tx), 100);
 
 	temperature = BME280_getTemperature(-1);
 	humidity = BME280_getHumidity(-1);
 	pressure = (uint16_t)BME280_getPressure();
-	snprintf(uart_tx, 38, "T: %.1f 'C | H: %.1f %% | P: %04d HPa\r\n", temperature, humidity, pressure);
-	HAL_UART_Transmit(&huart1, uartTransmit, sizeof(uartTransmit), 100);
+	snprintf(uart_tx, 45, "BME280 T: %.1f 'C | H: %.1f %% | P: %04d HPa \r\n", temperature, humidity, pressure);
+	HAL_UART_Transmit(&huart1, uart_tx_new, sizeof(uart_tx_new), 100);
 	HAL_UART_Transmit(&huart1, (uint8_t*)uart_tx, strlen(uart_tx), 100);
-	HAL_UART_Transmit(&huart1, uartTransmit, sizeof(uartTransmit), 100);
+	HAL_UART_Transmit(&huart1, uart_tx_new, sizeof(uart_tx_new), 100);
 
 	LCD_Rect_Fill(0, 0, 800, 480, BLUE);
 	LCD_Rect_Fill(1, 1, 798, 478, BLACK);
 
 	//	W25Q_Erase_Chip;
+	//	for (uint16_t i = 0; i < 4096; i++) AT24XX_Update(i, 0);
 
 	//	uint8_t flashIN[] = "W25Q IS OK \r\n";
 	//	W25Q_Save_Page(15, flashIN, 10);
@@ -288,42 +308,26 @@ int main(void)
 
 	for (uint32_t i = 0; i <= 65536; i++) TIM1->CCR1 = i;
 
-
-	//		for (uint16_t i = 0; i < 4096; i++) AT24XX_Update(i, 0);
-	//		DS3231_setHrs(13);
-	//		DS3231_setMin(50);
-	//		DS3231_setSec(0);
-	//		DS3231_setDate(15);
-	//		DS3231_setMonth(1);
-	//		DS3231_setYear(22);
-	//		DS3231_setDay(6);
-
-
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 	while (1) {
-		//		if (HAL_I2C_Init(&hi2c1) != HAL_OK) I2C_Clear(&hi2c1);
+		HAL_IWDG_Refresh(&hiwdg); //IWDG->KR = 0x0000AAAAU;
+		if (HAL_I2C_Init(&hi2c1) != HAL_OK) I2C_Init(&hi2c1);
 
-		//		HAL_RTC_GetTime(&hrtc, &clockTime, RTC_FORMAT_BIN);
-		//		rtcSec = clockTime.Seconds;
-		//		rtcMin = clockTime.Minutes;
-		//		rtcHrs = clockTime.Hours;
-		//		HAL_RTC_GetDate(&hrtc, &clockDate, RTC_FORMAT_BIN);
-		//		rtcDate = clockDate.Date;
-		//		rtcMonth = clockDate.Month;
-		//		rtcDay = clockDate.WeekDay;
-		//		rtcYear = clockDate.Year;
+//		HAL_RTC_GetTime(&hrtc, &clockTime, RTC_FORMAT_BIN);
+//		rtcSec = clockTime.Seconds;
+//		rtcMin = clockTime.Minutes;
+//		rtcHrs = clockTime.Hours;
+//		HAL_RTC_GetDate(&hrtc, &clockDate, RTC_FORMAT_BIN);
+//		rtcDate = clockDate.Date;
+//		rtcMonth = clockDate.Month;
+//		rtcYear = clockDate.Year;
+//		rtcWeekD = clockDate.WeekDay;
 
-		DS3231_Update();
-		rtcSec = DS3231_getSec();
-		rtcMin = DS3231_getMin();
-		rtcHrs = DS3231_getHrs();
-		rtcDay = DS3231_getDay();
-		rtcDate = DS3231_getDate();
-		rtcMonth = DS3231_getMonth();
-		rtcYear = DS3231_getYear();
+		DS3231_Update(); rtcSec = DS3231_getSec(); rtcMin = DS3231_getMin(); rtcHrs = DS3231_getHrs();
+		rtcDate = DS3231_getDate(); rtcMonth = DS3231_getMonth(); rtcYear = DS3231_getYear(); rtcWeekD = DS3231_getWeekDay();
 
 		if (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_5) == GPIO_PIN_SET) {
 
@@ -346,7 +350,6 @@ int main(void)
 		char clockPrint[13];
 
 		if (rtcSecLast != rtcSec) {
-
 
 			sprintf(clockPrint, "%02d", rtcSecLast);
 			LCD_Font(630, 85, clockPrint, &DejaVu_Sans_112, 1, BLACK);
@@ -382,11 +385,11 @@ int main(void)
 					sprintf(clockPrint, "%02d", rtcHrs);
 					LCD_Font(0, 170, clockPrint, &DejaVu_Sans_112, 2, ORANGE);
 
-					if (rtcDayLast != rtcDay) {
+					if (rtcWeekDLast != rtcWeekD) {
 
 						static const char* days[7] = { "MO", "TU", "WE", "TH", "FR", "SA", "SU" };
-						LCD_Font(710, 125, days[(7 + rtcDay - 2) % 7], &DejaVu_Sans_48, 1, BLACK);
-						LCD_Font(710, 125, days[(7 + rtcDay - 1) % 7], &DejaVu_Sans_48, 1, CYAN);
+						LCD_Font(710, 125, days[(7 + rtcWeekD - 2) % 7], &DejaVu_Sans_48, 1, BLACK);
+						LCD_Font(710, 125, days[(7 + rtcWeekD - 1) % 7], &DejaVu_Sans_48, 1, CYAN);
 
 						static const char* months[12] = { "JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC" };
 
@@ -398,7 +401,7 @@ int main(void)
 						sprintf(clockPrint, "%02d.%02d.%02d", rtcDate, rtcMonth, rtcYear);
 						LCD_Font(578, 175, clockPrint, &DejaVu_Sans_48, 1, CYAN);
 
-						rtcDayLast = rtcDay;
+						rtcWeekDLast = rtcWeekD;
 						rtcDateLast = rtcDate;
 					}
 					rtcMonthLast = rtcMonth;
@@ -622,7 +625,7 @@ int main(void)
 					DS3231_setYear(atoi(val));
 
 					val[1] = rx_buffer[12];
-					DS3231_setDay(atoi(val));
+					DS3231_setWeekDay(atoi(val));
 
 					for (uint32_t i = 0; i <= 65536; i++) TIM1->CCR1 = i;
 				}
@@ -765,7 +768,6 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-		HAL_IWDG_Refresh(&hiwdg); //IWDG->KR = 0x0000AAAAU;
 	}
   /* USER CODE END 3 */
 }
@@ -934,8 +936,8 @@ static void MX_RTC_Init(void)
 
   /* USER CODE END RTC_Init 0 */
 
-  RTC_TimeTypeDef sTime = {0};
-  RTC_DateTypeDef sDate = {0};
+//  RTC_TimeTypeDef sTime = {0};
+//  RTC_DateTypeDef sDate = {0};
 
   /* USER CODE BEGIN RTC_Init 1 */
 
@@ -960,24 +962,24 @@ static void MX_RTC_Init(void)
 
   /** Initialize RTC and set the Time and Date
   */
-  sTime.Hours = 0;
-  sTime.Minutes = 0;
-  sTime.Seconds = 0;
-  sTime.DayLightSaving = RTC_DAYLIGHTSAVING_NONE;
-  sTime.StoreOperation = RTC_STOREOPERATION_RESET;
-  if (HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BIN) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sDate.WeekDay = RTC_WEEKDAY_MONDAY;
-  sDate.Month = RTC_MONTH_JANUARY;
-  sDate.Date = 1;
-  sDate.Year = 0;
-
-  if (HAL_RTC_SetDate(&hrtc, &sDate, RTC_FORMAT_BIN) != HAL_OK)
-  {
-    Error_Handler();
-  }
+//  sTime.Hours = 0;
+//  sTime.Minutes = 0;
+//  sTime.Seconds = 0;
+//  sTime.DayLightSaving = RTC_DAYLIGHTSAVING_NONE;
+//  sTime.StoreOperation = RTC_STOREOPERATION_RESET;
+//  if (HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BIN) != HAL_OK)
+//  {
+//    Error_Handler();
+//  }
+//  sDate.WeekDay = RTC_WEEKDAY_MONDAY;
+//  sDate.Month = RTC_MONTH_JANUARY;
+//  sDate.Date = 1;
+//  sDate.Year = 0;
+//
+//  if (HAL_RTC_SetDate(&hrtc, &sDate, RTC_FORMAT_BIN) != HAL_OK)
+//  {
+//    Error_Handler();
+//  }
   /* USER CODE BEGIN RTC_Init 2 */
 
   /* USER CODE END RTC_Init 2 */

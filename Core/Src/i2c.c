@@ -101,7 +101,7 @@ static uint8_t wait_for_gpio_state_timeout(GPIO_TypeDef *port, uint16_t pin, GPI
     return ret;
 }
 
-void I2C_Clear(I2C_HandleTypeDef *hi2c) {
+void I2C_Init(I2C_HandleTypeDef *hi2c) {
 
     GPIO_InitTypeDef GPIO_InitStructure = {0};
 

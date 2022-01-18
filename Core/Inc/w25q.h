@@ -9,8 +9,7 @@
 #include <stdio.h>
 #include <string.h>
 
-typedef struct
-{
+typedef struct {
   uint16_t  PageSize;
   uint32_t  PageCount;
   uint32_t  SectorSize;
@@ -25,7 +24,7 @@ typedef struct
   uint8_t   StatusRegister1;
   uint8_t   StatusRegister2;
   uint8_t   StatusRegister3;
-}w25_info_t;
+} w25_info_t;
 
 #define	W25Q_SPI 			hspi1
 #define	W25Q_NSS_SOFT		1

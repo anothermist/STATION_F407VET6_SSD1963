@@ -10,17 +10,11 @@
 #define BME280_ADDR        (BME280_ADDR_G) << 1 			//Left shift to match the addressing format
 
 float BME280_getTemperature(int8_t n);
-
 float BME280_getHumidity(int8_t n);
-
 float BME280_getPressure(void);
-
 void BME280_Init(void);
-
 float fahrenheit(float celsius);
-
 double calculate_humidex(double temperature, double humidity);
-
 double calculate_humidityAbsolute(double temperature, double humidityRelative);
 
 #endif /* INC_BME280_H_ */
