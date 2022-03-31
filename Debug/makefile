@@ -60,8 +60,8 @@ all: main-build
 main-build: STATION_F407VE_SSD1963.elf secondary-outputs
 
 # Tool invocations
-STATION_F407VE_SSD1963.elf: $(OBJS) $(USER_OBJS) E:\GitHub\STATION_F407VE_SSD1963\STM32F407VETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "STATION_F407VE_SSD1963.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"E:\GitHub\STATION_F407VE_SSD1963\STM32F407VETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="STATION_F407VE_SSD1963.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -u _printf_float -u _scanf_float -Wl,--start-group -lc -lm -Wl,--end-group
+STATION_F407VE_SSD1963.elf: $(OBJS) $(USER_OBJS) E:\GitHub\STATION_F407VET6_SSD1963\STM32F407VETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "STATION_F407VE_SSD1963.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"E:\GitHub\STATION_F407VET6_SSD1963\STM32F407VETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="STATION_F407VE_SSD1963.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -u _printf_float -u _scanf_float -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
